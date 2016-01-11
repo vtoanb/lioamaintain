@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- google font -->
+<link href='https://fonts.googleapis.com/css?family=Lato:300' rel='stylesheet' type='text/css'>
+<!-- material icons -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js" type="text/javascript"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<div class="w3-containner parentheaderTemp w3-card-2  w3-white resizesmall">
+	
+	{% load staticfiles %}
+	<div class="w3-row tempLogo">
+		<div class="w3-col l6">
+			<img src="{% static "logomod.png" %}" alt="lioalogo" width="110" height="30">
+		</div>
+		<div class="w3-col l6">			
+			<form id="loginform" action="" method="post" class="w3-right">
+				{% csrf_token %}
+				{% if not user or user.is_anonymous %}
+				<input type="text" placeholder="username" class="w3-small">
+				<input type="password" placeholder="password" class="w3-small">
+				<input type="submit" class="w3-white w3-small w3-round-large w3-border w3-margin-right">
+				{%else%}
+				<div class="w3-right w3-padding-right">
+					<label>hello, {{user.username}}</label>
+					<label class="w3-border w3-round-large w3-center user-btn w3-padding-left w3-padding-right">logout</label>
+				</div>
+				{%endif%}
+				<div class="w3-right w3-padding-right logoutpart" hidden>
+					<label></label>
+					<label class="w3-border w3-round-large w3-center user-btn w3-padding-left w3-padding-right">logout</label>
+				</div>
+			</form>
+		</div>
+		
+	</div>
+	<div class="w3-row temp_myheader w3-white w3-border-top resizesmall">
+		<div class="w3-col l1  w3-padding-left w3-large  confirm-btn" width="40">Confirm</div>
+		<div class="w3-col l1  w3-padding-left w3-large  history-btn" width="40">History</div>
+		<div class="w3-col l1  w3-padding-left w3-large  counter-btn" width="40">Counter</div>		
+	</div>
+</div>
+
+<div hidden>
+	<p id="gemail">{{user.email}}</p>
+	<p id="gname">{{user.username}}</p>
+</div>
+
+<hr>
+
+<div class="w3-card-2 table_con w3-white resizesmall" id="confirm-table">
+	<table class="w3-table w3-center resizesmall report">
+		<tr class="w3-red">
+			<th class="small-hide">Maintainer</th>
+			<th>Machine</th>
+			<th>Type</th>
+			<th>Remain time</th>
+			<th class="small-hide">Comment</th>
+			<th></th>
+		</tr>
+		{% for his in not_approve_history %}
+		<tr class="{%if not forloop.first%}w3-border-top{%endif%}">
+		 	<td class="small-hide">{{his.maintainer}}</td>
+		 	<td>{{his.machine.machine_name}}</td>
+		 	<td>{{his.maintain_type}}</td>
+		 	<td>
+		 		{%for sch in maintain_schedule %}
+		 			{%if sch.machine.machine_name == his.machine.machine_name and sch.maintain_type = his.maintain_type%}
+		 				{{sch.maintain_time_remain}}
+		 			{%endif%}
+		 		{%endfor%}
+		 	</td>
+		 	<td class="small-hide">{{his.comment}}</td>
+		 	<td class="w3-right">
+		 		<button class=" w3-btn material-icons w3-small w3-white w3-round-large ok-btn">done</button>
+		 		<button class=" w3-btn material-icons w3-small w3-white w3-round-large delete-btn">delete</button>
+		 		<button class=" w3-btn material-icons w3-small w3-white w3-round-large large-expand-btn-raise">add</button>
+		 	</td>
+		 </tr>
+		 <tr class="normal-large-hide">
+		 	<td colspan="6">
+		 		<ul>
+		 		<li class="rescale-large-hide">Maintainer    : {{his.maintainer}}</li>
+		 		<li class="rescale-large-hide">Maintain Type : {{his.maintain_type}}</li>
+		 		<li>Raise time    : {{his.maintain_raise_time}}</li>
+		 		<li class="rescale-large-hide">Comment       : {{his.comment}}</li>
+		 		</ul>
+		 	</td>
+		 </tr>
+		{%endfor%}
+	</table>
+</div>
+
+<hr>
+
+<!-- comment approved table -->
+<div class="w3-card-2 table_con w3-white resizesmall" id="history-table">
+	<table class="w3-table w3-center resizesmall report table-head">
+		<tr class="w3-red">
+			<th class="small-hide">Maintainer</th>
+			<th>Machine</th>
+			<th>Type</th>
+			<th>Approver</th>
+			<th class="small-hide">Comment</th>
+			<th></th>
+		</tr>
+		<tr class="w3-border-bottom">
+			<td class="small-hide"><input type="text" class="w3-small filter-input" id="maintainer_filter"></td>
+			<td><input type="text" class="w3-small filter-input" id="machine_filter"></td>
+			<td><input type="text" class="w3-small filter-input" id="type_filter"></td>
+			<td><input type="text" class="w3-small filter-input" id="approver_filter"></td>
+			<td class="small-hide"><input type="text" class="w3-small" value="10 items" id="items_filter"></td>
+			<td class="w3-right">
+				<button class="w3-btn material-icons w3-small w3-white w3-round-large" id="filter-btn">search</button>
+			</td>
+		</tr>
+		{% for his in maintain_history %}
+		<tr class="{%if not forloop.first%}w3-border-top{%endif%} table-data">
+		 	<td class="small-hide">{{his.maintainer}}</td>
+		 	<td>{{his.machine.machine_name}}</td>
+		 	<td>{{his.maintain_type}}</td>
+		 	<td>{{his.approver}}</td>
+		 	<td class="small-hide">{{his.comment}}</td>
+		 	<td class="w3-right">
+		 		<button class=" w3-btn material-icons w3-small w3-white w3-round-large large-expand-btn">add</button>
+		 	</td>
+		 </tr>
+		 <tr class="normal-large-hide table-data">
+		 	<td colspan="6">
+		 		<ul>
+		 		<li class="rescale-large-hide">Maintainer    : {{his.maintainer}}</li>
+		 		<li class="rescale-large-hide">Maintain Type : {{his.maintain_type}}</li>
+		 		<li>Maintain time : {{his.maintain_time}}</li>
+		 		<li>Raise time    : {{his.maintain_raise_time}}</li>
+		 		<li>Approve time  : {{his.maintain_approve_time}}</li>
+		 		<li class="rescale-large-hide">Comment       : {{his.comment}}</li>
+		 		</ul>
+		 	</td>
+		 </tr>
+		{%endfor%}
+	</table>
+</div>
+
+<hr>
+<!-- move from login -->
+
+<div class="w3-row login-main-container">
+
+	<div class="w3-col m6" id="containcr4R">
+
+		<!-- control bar -->
+		<div class="w3-row l3 m10 s10 w3-card-2 w3-white" id="cr4short">
+			<div class="w3-col w3-text-red s2 w3-border-right w3-xxlarge" >
+				<input type="text" value="{{default_machine}}" id="ctrlbar_machine_name">
+				
+			</div>
+			
+			<div class="w3-col s4 w3-center">
+				<div class="w3-row s3 w3-xlarge"> <input type="text" value={{time.year}}  id="ctrlbar_year"> </div>
+				<div class="w3-row s3 w3-xlarge"> <input type="text" value={{time.month}} id="ctrlbar_month"> </div>
+			</div>
+
+
+			<div class="w3-col s2 w3-center w3-xlarge">
+				<div class="w3-row s2"> 
+					<button class="w3-btn w3-white material-icons w3-round-jumbo" id="ctrlbar_next">keyboard_arrow_right</button> </div>
+				<div class="w3-row s2"> 
+					<button class="w3-btn w3-white material-icons w3-round-jumbo" id="ctrlbar_prev">update</button> </div>
+			</div>
+
+
+		</div>
+		
+		<div class="w3-row l3 m10 s10 w3-card-2 w3-white" id="cr4-enlarge">
+
+			<!-- k4 bao tri + counter -->
+			<div class="w3-containner w3-row">
+				<div class="w3-col">
+					<div class="w3-containner w3-center" id="briefbar">PRODUCT</div>
+				</div>
+			</div>
+			<div class="w3-row">
+				<div class="w3-containner w3-center">
+					<canvas id="myChart" width="460" height="260"></canvas>	
+				</div>
+			</div>
+
+			<!-- insert to here -->
+			<div class="w3-col s12">
+				<div class="w3-containner w3-center" id="briefbar"> ENERGY</div>
+			</div>
+
+
+			<div class="w3-containner w3-center">
+				<canvas id="myChartE2" width="460" height="260"></canvas>
+			</div>
+				
+		</div>
+
+
+
+		
+
+	</div>
+
+	<!-- generated code for machine here-->
+	<div class="w3-col m6" id="containcr4">
+		{%for machine in machines %}
+	<div class="w3-col l3 m10 s10 w3-card-2 w3-white" id="cr-brief">
+		<div class="w3-row">
+			<div class="w3-col s3 brief-label-btn" id="cr-brief-label">
+				{{machine.machine_name}}
+			</div>
+			<div class="w3-col s9">
+				
+				<div class="w3-row w3-red" id="cr-brief-label-maintain">
+				
+					{%for maintain in maintains%}
+					{%if machine.machine_name == maintain.machine.machine_name%}
+					<div class="w3-col s4 w3-center">
+						{{maintain.maintain_type}}
+						
+					</div>
+					{%endif%}
+					{%endfor%}
+				</div>
+				<div class="w3-row">
+					{%for maintain in maintains%}
+						{%if machine.machine_name == maintain.machine.machine_name%}
+							<div class="w3-col s4 w3-large w3-center">
+						{{maintain.maintain_time_remain}}
+							</div>
+						{%endif%}
+					{%endfor%}
+				</div>
+				<div class="w3-row maintainchoices">
+					{%for maintain in maintains%}
+					{%if machine.machine_name == maintain.machine.machine_name%}
+					<div class="w3-col s4 w3-center">
+						<input type="radio" name={{machine.machine_name}} value={{maintain.maintain_type}} 
+						                       {%if maintain.maintain_time_remain >= 10 %}disabled{%endif%} >
+					</div>
+					{%endif%}
+					{%endfor%}	
+				</div>
+
+			</div>
+		</div>
+	</div>
+	{%endfor%}
+
+		<div class="modal fade" id="myModal" role="dialog">
+		    <div class="modal-dialog modal-sm">
+		    
+		      <!-- Modal content-->
+		      <div class="modal-content w3-center">
+		        <div class="modal-header">
+		          <button type="button" class="close" data-dismiss="modal">&times;</button>
+		          <h6 class="modal-title">Enter comment</h6>
+		        </div>
+		        <div class="modal-body">
+					<div class="form-group">
+	      				<input type="text" class="form-control" id="usr">
+					</div>
+		          <button type="button" class="w3-btn w3-red w3-round-xlarge" id="modalMaintainBtn" >maintain</button>
+		      </div>
+		      
+		    </div>
+
+		</div>
+
+	</div>
+	
+</div>
+	
+
+
+
+<!-- confirm modal -->
+<div class="modal fade myModal-Confirm" id="myModal" role="dialog">
+    <div class="modal-dialog modal-sm">
+      <!-- Modal content-->
+      <div class="modal-content w3-center">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h6 class="modal-title modal-title-confirm">Confirm this maintain?</h6>
+        </div>
+        <div class="modal-body">
+          <button type="button" class="w3-btn w3-red w3-round-xlarge" id="modalMaintainBtn-confirm" >Ok</button>
+        </div>
+    </div>
+</div>
+
+<!-- user list modal -->
+
+
+
+{% load staticfiles %}
+
+<link rel="stylesheet" href="{% static      'bootstrap.min.css' %}">
+
+<script src="{% static "progressbar.js" %}" type="text/javascript"></script>
+<link rel="stylesheet" href="{% static      'w3.css' %}">
+<link rel="stylesheet" href="{% static 'mystyle.css' %}">
+
+<!-- start script of page -->
+<script type="text/javascript">
+$("document").ready(function(){
+	/* confirmation of modal */
+  var modalConfirm = false;
+  var aboveHeight = $(".temp_myheader").outerHeight();
+  var aboveHeightRel;
+
+
+    /* minimal example of progressbar javascript */
+  window.onload = function onLoad() {
+
+  	var width = $(window).width();
+
+  	if(width < 1000){
+   		$(".resizesmall").css("width","485px");
+   		$(".small-hide").hide();
+   		$(".small-show").show();
+   		$(".rescale-large-hide").show(); 
+  	}
+  	else{
+   		$(".resizesmall").css("width","1006px");
+   		$(".small-hide").show();
+   		$(".small-show").hide();
+   		$(".rescale-large-hide").hide(); 			  		
+  	}
+
+	$(".normal-large-hide").hide();
+
+	if ($(window).scrollTop() > aboveHeight){aboveHeightRel = aboveHeight;}
+  	else{aboveHeightRel = 2 * aboveHeight;}
+
+    ajaxupdatefn();
+
+     
+  };
+  /* window scroll handler */
+  	//when scroll
+	$(window).scroll(function(){
+
+	    //if scrolled down more than the header’s height
+	        if ($(window).scrollTop() > aboveHeight){
+
+	    // if yes, add “fixed” class to the <nav>
+	    // add padding top to the #content (value is same as the height of the nav)
+
+
+	    	$(".temp_myheader").removeClass('w3-white');
+
+	        $(".temp_myheader").addClass('fixed').css('top','0').next()
+	        .css('padding-top','200px');
+
+	        aboveHeightRel = aboveHeight;
+
+	        } else {
+
+	    // when scroll up or less than aboveHeight,remove the “fixed” class, and the padding-top
+	        $(".temp_myheader").removeClass('fixed').next()
+	        .css('padding-top','0');
+
+	        aboveHeightRel = 2 * aboveHeight;
+	        }
+	});
+
+  $("#loginform").on('submit',function(e){
+  		e.preventDefault();
+  		var form = $("#loginform");
+  		var user = form.find("input:text").val();
+  		var password = form.find("input:password").val();
+  		$.ajax({
+ 			url  : "ajaxlogin/",
+ 			type : "POST",
+ 			data : {
+ 				"user" : user,
+ 				"password" : password,
+ 			},
+ 			success : function(json){
+ 				form.find("input").hide();
+ 				$(".logoutpart").show();
+ 				$(".logoutpart label:first-child").text("hello, "+ user);
+ 				$("#gname").text(user);
+ 				
+ 			},
+  		});
+  });
+
+
+  $("#filter-btn").click(function(){
+  	console.log($("#type_filter").val());
+  	//ajax to filter update maintain history
+	$.ajax({
+	    url : "ajaxupdatetable/",
+	    type : "POST",
+	    data : {
+	        maintainer_filter : $("#maintainer_filter").val(),
+	        machine_filter : $("#machine_filter").val(),
+	        type_filter : $("#type_filter").val(),
+	        approver_filter : $("#approver_filter").val(),
+	        items_filter : $("#items_filter").val().replace(" items",""),
+	    },
+	    success : function(json){
+
+	        $("tr.table-data").remove();
+
+	        $.each(json,function(key,item){
+			var x =	"<tr class= 'w3-border-top table-data'><td class='small-hide-add'>"+
+			item[0]+ "</td><td>"+ item[1]+ "</td><td>"+ item[2]+ "</td><td>"+ item[3]+ "</td><td class='small-hide-add'>"
+			+item[4]+ "</td><td class='w3-right'><button class=' w3-btn material-icons w3-small w3-white w3-round-large large-expand-btn-add'>add</button></td>" +
+		 	"</tr><tr class='normal-large-hide-add table-data'>"+"<td colspan='6'><ul><li class='rescale-large-hide-add'>Maintainer    : "+
+			item[0]+"</li><li class='rescale-large-hide-add'>Maintain Type : "+ item[2]+"</li><li>Maintain time : "+
+			item[5].split('.')[0] +"</li><li>Raise time    : "+item[6].split('.')[0] +"</li><li>Approve time  : "+
+			item[7].split('.')[0] + "</li><li class='rescale-large-hide-add'>Comment       : "+item[4]+"</li></ul></td></tr>";	
+
+			$("table.table-head").append(x);        	
+	        });
+
+	        var width = $(window).width();
+
+		  	if(width < 1000){
+		   		$(".resizesmall").css("width","485px");
+		   		$(".small-hide-add").hide();
+		   		$(".small-show-add").show();
+		   		$(".rescale-large-hide-add").show(); 
+		  	}
+		  	else{
+		   		$(".resizesmall-add").css("width","1006px");
+		   		$(".small-hide-add").show();
+		   		$(".small-show-add").hide();
+		   		$(".rescale-large-hide-add").hide(); 			  		
+		  	}
+		  	/* bind handler for resize */
+		  	$(window).bind("resize",function(){
+		  		var xm = $(window).width();
+		  		if(xm < 1000){
+		  			$(".small-hide-add").hide();
+		  			$(".rescale-large-hide-add").show();
+		  		}
+		  		else{
+		  			$(".small-hide-add").show();
+		  			$(".rescale-large-hide-add").hide();
+		  		}
+		  		
+		  	});
+		  		
+        	$(".normal-large-hide-add").hide();
+
+			$(".large-expand-btn-add").click(function(){
+				if($(this).text() == "add"){
+					$(this).text("remove");
+				}
+				else{
+					$(this).text("add");
+				}
+				var currentRow = $(this).parent().parent();
+				var nextRow = currentRow.next("tr");
+				nextRow.toggle();
+     		});
+
+	    },
+	});
+  });
+
+
+  $(".confirm-btn").click(function(){
+  	$('html, body').animate({scrollTop: $('#confirm-table').offset().top - aboveHeightRel }, 'fast');
+  });
+
+  $(".history-btn").click(function(){
+  	$('html, body').animate({scrollTop: $('#history-table').offset().top - aboveHeightRel }, 'fast');
+  });
+
+  $(".counter-btn").click(function(){
+  	$('html, body').animate({scrollTop: $('#cr4short').offset().top - aboveHeightRel }, 'fast');
+  });
+
+  $(".user-btn").click(function(){
+  	$("#gname").text("");
+  	location.href = "/logout";
+  });
+
+  $(".brief-label-btn").on('click',function(){
+  	$("#ctrlbar_machine_name").val($(this).text().split("\t").join(""));
+  })
+
+  $(".large-expand-btn").click(function(){
+  	if($(this).text() == "add"){
+  		$(this).text("remove");
+  	}
+  	else{
+  		$(this).text("add");
+  	}
+  	var currentRow = $(this).parent().parent();
+  	var nextRow = currentRow.next("tr");
+  	nextRow.toggle();
+  });
+
+    $(".large-expand-btn-raise").click(function(){
+  	if($(this).text() == "add"){
+  		$(this).text("remove");
+  	}
+  	else{
+  		$(this).text("add");
+  	}
+  	var currentRow = $(this).parent().parent();
+  	var nextRow = currentRow.next("tr");
+  	nextRow.toggle();
+  });
+
+  $(window).resize(function(e){
+  	var width = $(window).width();
+
+  	if(width < 1000){
+   		$(".resizesmall").css("width","485px");
+   		$(".small-hide").hide();
+   		$(".small-show").show();
+   		$(".rescale-large-hide").show(); 
+  	}
+  	else{
+   		$(".resizesmall").css("width","1006px");
+   		$(".small-hide").show();
+   		$(".small-show").hide();
+   		$(".rescale-large-hide").hide(); 			  		
+  	}
+
+  	aboveHeight = $(".temp_myheader").outerHeight();
+	if($(window).scrollTop() > aboveHeight){aboveHeightRel = aboveHeight;}
+  	else{aboveHeightRel = 2 * aboveHeight;}
+  });
+
+  	var rowConfirm,tdsConfirm,rowdataConfirm = [], approver_emailConfirm,approverConfirm;
+
+	$(".ok-btn").click(function(){
+		rowConfirm = $(this).parent().parent();
+		tdsConfirm = rowConfirm.find("td");
+		rowdataConfirm = [];
+		approver_emailConfirm = $("#gemail").text();
+		approverConfirm = $("#gname").text();
+		$.each(tdsConfirm,function(e){
+			rowdataConfirm.push($(this).text());
+		});
+
+		console.log(rowdataConfirm[1]+":"+rowdataConfirm[2]+":"+rowdataConfirm[0]+":"+approverConfirm+":"+approver_emailConfirm);
+		/* restore this modal title and ok button */
+		$(".modal-title-confirm").text("Confirm this maintain?");
+		$("#modalMaintainBtn-confirm").show();
+        $(".myModal-Confirm").modal({backdrop: false});		
+	});
+
+	$("#modalMaintainBtn-confirm").click(function(){
+		//ajax to update maintain list
+        $.ajax({
+            url : "updatemaintain/",
+            type : "POST",
+            data : {
+            	command : "approve",
+                machine_name : rowdataConfirm[1],
+                type : rowdataConfirm[2],
+                user_name : rowdataConfirm[0],
+                approver : approverConfirm,
+                email : approver_emailConfirm,
+            },
+            success : function(json){
+
+                if(json=="success"){
+                	rowConfirm.hide();
+                	rowConfirm.next("tr").hide();
+					$(".modal-title-confirm").text("Confirm successful!");
+                	$("#modalMaintainBtn-confirm").hide();
+
+                }
+
+            },
+        });
+
+
+	});
+
+
+
+	$(".delete-btn").click(function(){
+		var row = $(this).parent().parent();
+		var tds = row.find("td");
+		var rowdata = [];
+		var delete_user_email = $("#gemail").text();
+		var delete_user = $("#gname").text();
+		$.each(tds,function(e){
+			rowdata.push($(this).text());
+		});
+
+		//ajax to update maintain list
+        $.ajax({
+            url : "updatemaintain/",
+            type : "POST",
+            data : {
+            	command : "delete",
+                machine_name : rowdata[1],
+                type : rowdata[2],
+                user_name : rowdata[0],
+                delete_user : delete_user,
+                email : delete_user_email,
+            },
+            success : function(json){
+
+                if(json=="success"){
+                	row.hide();
+                	row.next("tr").hide();
+
+                }
+
+            },
+        });			
+
+	});
+
+	/* script move from main.js */
+
+	   // chart data
+    var dataE2 = {
+    labels: [],
+    datasets: [
+        {
+            label: "My First dataset",
+            fillColor: "rgba(228,0,0,0.6)",
+            strokeColor: "rgba(0,0,0,0)",
+            highlightFill: "rgba(220,220,220,0.75)",
+            highlightStroke: "rgba(220,220,220,1)",
+            data: []
+        },
+    ]
+    };
+
+    var data = {
+    labels: [],
+    datasets: [
+        {
+            label: "My First dataset",
+            fillColor: "rgba(22,22,255,0.4)",
+            strokeColor: "rgba(220,220,220,0)",
+            highlightFill: "rgba(220,220,220,0.75)",
+            highlightStroke: "rgba(220,220,220,1)",
+            data: []
+        },
+    ]
+    };
+
+    // chart options
+
+    options={
+        //Boolean - Whether the scale should start at zero, or an order of magnitude down from the lowest value
+        scaleBeginAtZero : true,
+
+        //Boolean - Whether grid lines are shown across the chart
+        scaleShowGridLines : true,
+
+        //String - Colour of the grid lines
+        scaleGridLineColor : "rgba(0,0,0,.5)",
+
+        //Number - Width of the grid lines
+        scaleGridLineWidth : 0.2,
+
+        //Boolean - Whether to show horizontal lines (except X axis)
+        scaleShowHorizontalLines: true,
+
+        //Boolean - Whether to show vertical lines (except Y axis)
+        scaleShowVerticalLines: false,
+
+        //Boolean - If there is a stroke on each bar
+        barShowStroke : true,
+
+        //Number - Pixel width of the bar stroke
+        barStrokeWidth : 2,
+
+        //Number - Spacing between each of the X value sets
+        barValueSpacing : 0,
+
+        //Number - Spacing between data sets within X values
+        barDatasetSpacing : 1,
+
+        animationSteps: 1,
+
+    };
+
+
+    /* code for modal processing part */
+    var modalMachineName = "";
+    var modalMaintainType = "";
+    var modalComment = "";
+    var modalUserName = "";
+
+    $(":radio").change(function(){
+        $(".modal-title").text("Enter comment");
+        // restore
+        $("#usrID").text("comment");
+        $("#modalMaintainBtn").show();
+        $("#usr").show();
+        // assign to global variable to process maintain
+        modalMachineName = this.name;
+        modalMaintainType = this.value;
+        $("#myModal").modal({backdrop: false});
+    });
+
+    // $("#myModal").on('hide.bs.modal',function(e){
+    // });
+    
+    $("#modalMaintainBtn").click(function(){
+        
+        modalComment = $("#usr").val();
+        modalUserName = $("#gname").text();
+        console.log(modalMachineName + modalMaintainType + modalUserName);
+
+        $.ajax({
+            url : "ajaxdomaintain/",
+            type: "POST",
+            data: {
+                machine_name : modalMachineName,
+                maintain_type : modalMaintainType,
+                user_name : modalUserName,
+                comment : modalComment,
+            },
+            success: function(json){
+                console.log(typeof json);
+                $(".modal-title").text(json.status);
+                $("#modalMaintainBtn").hide();
+                $("#usr").hide();
+            },
+        });
+    });
+
+
+    
+    $(":button.domaintain").click(function(){
+        console.log("sanitycheck");
+        $(":radio:checked").each(function(){
+            $(".comment-list").append("<div><label>comment for "+this.name+"</label><input class='w3-input' type= 'text'></input></div>");
+            var x = $("#gname").text();
+            console.log(x);
+            $.ajax({
+                url : "domaintain/",
+                type : "POST",
+                data : {
+                    machine_name : this.name,
+                    type : this.value,
+                    user_name : $("#gname").text(),
+                },
+                success : function(json){
+                    console.log("success");
+
+                },
+            });
+
+        });
+    });
+
+    function ajaxupdatefn(){
+
+
+        // create new chart
+        var ctxE2 = document.getElementById("myChartE2").getContext("2d");
+        var myBarChartE2 = new Chart(ctxE2).Line(dataE2, options);
+        var ctx = document.getElementById("myChart").getContext("2d");
+        var myBarChart = new Chart(ctx).Line(data, options);
+        var rDate,rMonth,rYear;
+        var lDate,lMonth,lYear;
+        var column;
+
+        // ajax to update chart
+        $.ajax({
+            url : "ajax30dayenergy/",
+            type : "POST",
+            data : { ajax_machine_name : $("#ctrlbar_machine_name").val()},
+            success : function(json){
+                var i=0;
+                $.each(json,function(key,item){
+
+                    strDat = item.split(":");
+                    labelX = strDat[0].split("/");
+                    label = labelX[0]
+                    if(labelX[0]=="1"){
+                        label = labelX[1]+"/"+labelX[0];
+                    };
+                    myBarChartE2.addData([strDat[1]], label);
+                    myBarChart.addData([strDat[2]], label);
+                    if(i == 0){
+                        lDate = labelX[0];
+                        lMonth = labelX[1];
+                        lYear = labelX[2];
+                    }
+                    else if(i == (json.length - 1)){
+                        rDate = labelX[0];
+                        rMonth = labelX[1];
+                        rYear = labelX[2];
+                    }
+                    i = i + 1;
+                });
+                column = i;
+
+
+
+            },
+
+        });
+
+        $('#ctrlbar_next').on('click',function(){
+            $.ajax({
+                url  : "ajaxprevday/",
+                type : "POST",
+                data : {machine_name : $("#ctrlbar_machine_name").val() , // change to read ctrlbar
+                        rDate   : rDate,
+                        rMonth  : rMonth,
+                        rYear   : rYear, 
+                        },
+                success: function(json){
+
+                    $.each(json,function(key,item){
+                        if(column > 19){
+                            myBarChart.removeData();
+                            myBarChartE2.removeData();
+                            column -= 1;
+                        }
+        
+                        dat = item.split(":");
+                        //update right point of chart
+                        rDate = dat[0];
+                        rMonth = dat[1];
+                        rYear = dat[2];
+                        if(dat[0] == '1'){
+                            dat[0] = dat[0] + "/" + dat[1];
+                        }
+                        myBarChart.addData([dat[4]],dat[0]);
+                        myBarChartE2.addData([dat[3]],dat[0]);
+
+                        column += 1;
+
+                        console.log(column);
+                        
+                    });
+                },
+            });
+        });
+        $('#ctrlbar_prev').on('click',function(){
+            for(var i = 0; i < column; i++){
+                myBarChart.removeData();
+                myBarChartE2.removeData();
+            };
+        // ajax to update chart
+            $.ajax({
+                url : "ajaxgetmonth/",
+                type : "POST",
+                data : { ajax_machine_name : $("#ctrlbar_machine_name").val(),
+                         month : $("#ctrlbar_month").val(),
+                         year  : $("#ctrlbar_year").val(),
+                    },
+                success : function(json){
+
+                    var i=0;
+                    $.each(json,function(key,item){
+
+                        strDat = item.split(":");
+                        labelX = strDat[0].split("/");
+                        label = labelX[0]
+                        if(labelX[0]=="1"){
+                            label = labelX[1]+"/"+labelX[0];
+                        };
+                        myBarChartE2.addData([strDat[1]], label);
+                        myBarChart.addData([strDat[2]], label);
+                        if(i == 0){
+                            lDate = labelX[0];
+                            lMonth = labelX[1];
+                            lYear = labelX[2];
+                        }
+                        else if(i == (json.length - 1)){
+                            rDate = labelX[0];
+                            rMonth = labelX[1];
+                            rYear = labelX[2];
+                        }
+                        i = i + 1;
+                    });
+
+                    column = i;
+
+                    console.log(column);
+
+                },
+
+            });
+        });
+
+
+    };
+
+
+
+
+	//csrf token fix
+	// // This function gets cookie with a given name
+	// function getCookie(name) {
+	//     var cookieValue = null;
+	//     if (document.cookie && document.cookie != '') {
+	//         var cookies = document.cookie.split(';');
+	//         for (var i = 0; i < cookies.length; i++) {
+	//             var cookie = jQuery.trim(cookies[i]);
+	//             // Does this cookie string begin with the name we want?
+	//             if (cookie.substring(0, name.length + 1) == (name + '=')) {
+	//                 cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+	//                 break;
+	//             }
+	//         }
+	//     }
+	//     return cookieValue;
+	// }
+	// var csrftoken = getCookie('csrftoken');
+
+	// /*
+	// The functions below will create a header with csrftoken
+	// */
+
+	// function csrfSafeMethod(method) {
+	//     // these HTTP methods do not require CSRF protection
+	//     return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+	// }
+	// function sameOrigin(url) {
+	//     // test that a given url is a same-origin URL
+	//     // url could be relative or scheme relative or absolute
+	//     var host = document.location.host; // host + port
+	//     var protocol = document.location.protocol;
+	//     var sr_origin = '//' + host;
+	//     var origin = protocol + sr_origin;
+	//     // Allow absolute or scheme relative URLs to same origin
+	//     return (url == origin || url.slice(0, origin.length + 1) == origin + '/') ||
+	//         (url == sr_origin || url.slice(0, sr_origin.length + 1) == sr_origin + '/') ||
+	//         // or any other URL that isn't scheme relative or absolute i.e relative.
+	//         !(/^(\/\/|http:|https:).*/.test(url));
+	// }
+	
+
+	// $.ajaxSetup({
+	//     beforeSend: function(xhr, settings) {
+	//         if (!csrfSafeMethod(settings.type) && sameOrigin(settings.url)) {
+	//             // Send the token to same-origin, relative URLs only.
+	//             // Send the token only if the method warrants CSRF protection
+	//             // Using the CSRFToken value acquired earlier
+	//             xhr.setRequestHeader("X-CSRFToken", csrftoken);
+	//         }
+	//     }
+	// });
+	
+	$.ajaxSetup({ 
+     beforeSend: function(xhr, settings) {
+         function getCookie(name) {
+             var cookieValue = null;
+             if (document.cookie && document.cookie != '') {
+                 var cookies = document.cookie.split(';');
+                 for (var i = 0; i < cookies.length; i++) {
+                     var cookie = jQuery.trim(cookies[i]);
+                     // Does this cookie string begin with the name we want?
+                     if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                         cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                         break;
+                     }
+                 }
+             }
+             return cookieValue;
+         }
+         if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+             // Only send the token to relative URLs i.e. locally.
+             xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+         }
+     } 
+});
+
+});
+
+</script>
+
+
+
+</body>
+</html>
+
+
+

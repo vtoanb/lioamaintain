@@ -1,0 +1,265 @@
+body{
+	background-color: #f5f8fa;
+}
+
+.modal{
+	font-family: 'Lato', sans-serif;
+
+}
+.progress {
+    height: 150px;
+}
+.progress > svg {
+    height: 100%;
+    display: block;
+    background: white;
+    opacity: 1;
+}
+
+hr{
+	width: 1px;
+}
+
+#cr4{
+	height: 304px;
+	width: 520px;
+	margin-left: 40px;
+	margin-bottom: 16px;
+}
+
+.login-main-container{
+	margin-top: 2px;
+}
+
+#cr4-enlarge{
+	height: 608px;
+	width: 485px;
+	margin-left: 40px;
+	margin-bottom: 16px;
+	font-family: 'Lato', sans-serif;
+}
+
+#cr4short{
+	height: 80px;
+	width: 485px;
+	margin-left: 40px;
+	margin-bottom: 16px;
+	font-family: 'Lato', sans-serif;
+	font-size: 14px;
+}
+
+#ctrlbar_machine_name{
+	height: 80px;
+	width: 100px;
+	border: none;
+
+}
+
+
+
+#containcr4{
+	width: 566px;
+	height: 704px;
+	overflow: auto;
+	background-color: transparent;
+}
+
+#containcr4::-webkit-scrollbar {
+    width: 1px;
+}
+
+
+/* Track */
+#containcr4::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 0px rgba(0,0,0,0); 
+    -webkit-border-radius: 0px;
+    border-radius: 0px;
+}
+ 
+
+
+/* Handle */
+#containcr4::-webkit-scrollbar-thumb {
+    -webkit-border-radius: 0px;
+    border-radius: 0px;
+    background: rgba(255,0,0,0.8); 
+    -webkit-box-shadow: inset 0 0 0px rgba(0,0,0,0); 
+}
+
+
+
+#containcr4R{
+	width: 520px;
+	height: 760px;
+
+}
+
+#cr-brief {
+	height: 90px;
+	width: 485px;
+	margin-left: 40px;
+	margin-bottom: 15px;
+	font-family: 'Lato', sans-serif;
+}
+
+#cr-brief-label{
+	height: 90px;
+	font-size: 30px;
+}
+#cr-brief-label-maintain{
+	height: 30px;
+	font-size: 15px;
+}
+#cr-brief-label-maintain-remain{
+	font-size: 40px;
+}
+#newcanvas{
+	border-bottom: 1px dashed gray;
+	width: 250px;
+	height: 250px;
+}
+#briefbar{
+	margin-left: 10px; 
+	margin-top : 8px;
+	font-family: 'Lato', sans-serif;
+	
+}
+
+#tophr{
+	margin-top: 0.5em;
+	margin-bottom: 3em;
+}
+
+
+#hr-div{
+	border:  solid 1px #429388;
+	margin-left: 94px;
+	margin-right:94px;
+}
+
+.table_con{
+	margin-left: 40px;
+	margin-top: 15px;
+	width: 1044px;
+	min-height: 40px;
+	font-family: "Lato", sans-serif;
+}
+
+.mylogo{
+	height: 40px;
+	margin-top: 0px;
+}
+
+.tempLogo{
+	height: 85px;
+	padding-top: 15px;
+	padding-left: 14px;
+}
+
+.myheader{
+	margin-top: 15px;
+	margin-bottom: 65px;
+	height: 40px;
+	width: 1044px;
+	font-family: 'Lato', sans-serif;
+
+}
+
+.temp-smalltag{
+	width: 173px;
+}
+
+.temp-bigtag{
+	width: 260px;
+}
+
+.temp_myheader{
+	/*margin-top: 45px;*/
+	width: 1044px;
+	font-family: 'Lato', sans-serif;
+	/* add to control nav bar at top 
+	position: relative;*/
+}
+
+
+.temp_myheader_Login{
+	margin-top: 45px;
+	width: 485px;
+	font-family: 'Lato', sans-serif;
+}
+
+.parentheader{
+	margin-left: 40px;
+	width: 1000px;
+	font-family: 'Lato', sans-serif;
+}
+
+.parentheaderTemp{
+	margin-left: 40px;
+	width: 1044;
+	font-family: 'Lato', sans-serif;	
+}
+
+.parentheaderTemp_Login{
+	margin-left: 40px;
+	width: 485px;
+	font-family: 'Lato', sans-serif;	
+}
+
+.btnhome{
+	margin-left: 15px;
+}
+
+.temp_btnhome{
+	margin-left: 2px;
+}
+
+
+#header-machine{
+	font-family: 'Lato', sans-serif;
+	margin-left: 40px;
+	color: #429388;
+}
+#footer-button{
+
+}
+#power-meter{
+	font-family: 'Lato', sans-serif;
+	font-size: 16px;
+	margin-top: -5px;
+}
+#time_server_p{
+	font-family: 'Lato', sans-serif;
+	font-size:  46px;
+
+}
+
+#ctrlbar_year{
+	width: 70px;
+	border: none;
+	text-align: center;
+}
+
+#ctrlbar_month{
+	width: 70px;
+	border: none;
+	text-align: center;
+}
+
+#cr-comment {
+	width: 480px;
+	min-height: 90px;
+	margin-left: 40px;
+	margin-bottom: 15px;
+	font-family: 'Lato', sans-serif;
+}
+
+.fixed {
+        position:fixed;
+        background-color: rgba(11,14,27,0.45);
+        color: white;
+}
+
+.filter-input{
+	width: 60px;
+}

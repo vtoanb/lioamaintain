@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href='https://fonts.googleapis.com/css?family=Lato:300' rel='stylesheet' type='text/css'>
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+{% csrf_token %}
+<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+{% load staticfiles %}
+<link rel="stylesheet" href="{% static      'w3.css' %}">
+
+<style type="text/css">
+	h2{
+		font-family: font-family: 'Source Sans Pro', sans-serif;
+	}
+.mylogo{
+  height: 40px;
+  margin-top: 15px;
+}
+  .myheader{
+  margin-top: 15px;
+  margin-bottom: 65px;
+  height: 40px;
+  width: 1044px;
+}
+
+.parentheader{
+  margin-left: 40px;
+  font-family: 'Lato', sans-serif;
+
+}
+
+.btnhome{
+  margin-left: 15px;
+}
+
+</style>
+
+</head>
+<body class="w3-containner">
+
+{% if user and not user.is_anonymous %}
+<div class="w3-containner w3-col w3-theme parentheader">
+  
+  {% load staticfiles %}
+  <div class="w3-row mylogo">
+    <img src="{% static "logomod.png" %}" alt="lioalogo" width="110" height="30">
+  </div>
+  <div class="w3-row myheader w3-indigo w3-round">
+    <div class=" w3-large w3-btn w3-indigo btnhome">HOME</div>
+    <div class=" w3-large w3-btn w3-indigo btnlist">LIST</div>
+    <div class=" w3-large w3-btn w3-indigo">{{user.get_full_name}}</div>
+  </div>
+
+  <div class="w3-row" hidden>
+    <a id="gname">{{ user.get_full_name }}</a><br>
+    <a href="/logout">Logout</a>
+    <p id="gemail" hidden>{{user.email}}</p><br>
+  </div>
+</div>
+
+<a id="gname" hidden>{{ user.get_full_name }}</a><br>
+<a href="/logout" hidden>Logout</a>
+<p id="gemail" hidden>{{user.email}}</p>
+
+<div class="container">
+  <h2>Maintain raising list</h2>
+  <p>The .table class adds basic styling (light padding and only horizontal dividers) to a table:</p>            
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Maintainer</th>
+        <th>Machine name</th>
+        <th>Maintain type</th>
+        <th>Raise time</th>
+        <th>Comment</th>
+        <th>Approve</th>
+        <th>Delete</th>
+      </tr>
+    </thead>
+    <tbody>
+      {%for maintain in maintain_history%}
+      	{%if not maintain.maintain_approve%}
+      		<tr>
+      			<td>{{maintain.maintainer}}</td>
+      			<td>{{maintain.machine.machine_name}}</td>
+      			<td>{{maintain.maintain_type}}</td>
+      			<td>{{maintain.maintain_raise_time}}</td>
+      			<td>{{maintain.comment}}</td>
+      			<td><button class="ok-btn w3-btn w3-white">Ok</button></td>
+      			<td><button class="delete-btn w3-btn w3-white">Delete</button></td>
+      		</tr>
+
+      	{%endif%}
+      {%endfor%}
+      
+    </tbody>
+  </table>
+</div>
+
+<div class="container">
+  <h2>Maintain history</h2>
+  <p>The .table class adds basic styling (light padding and only horizontal dividers) to a table:</p>            
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Maintainer</th>
+        <th>Approver</th>
+        <th>Machine name</th>
+        <th>Maintain type</th>
+        <th>Raise time</th>
+        <th>Approve time</th>
+        <th>Comment</th>
+      </tr>
+    </thead>
+    <tbody>
+      {%for maintain in maintain_history%}
+      	{%if maintain.maintain_approve%}
+      		<tr>
+      			<td>{{maintain.maintainer}}</td>
+      			<td>{{maintain.approver}}</td>
+      			<td>{{maintain.machine.machine_name}}</td>
+      			<td>{{maintain.maintain_type}}</td>
+      			<td>{{maintain.maintain_raise_time}}</td>
+      			<td>{{maintain.maintain_approve_time}}</td>
+      			<td>{{maintain.comment}}</td>
+      		</tr>
+
+      	{%endif%}
+      {%endfor%}
+      
+    </tbody>
+  </table>
+</div>
+
+{% else %}
+  <a href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}">Login with Google</a>
+{% endif %}
+
+<script type="text/javascript">
+$("document").ready(function(){
+
+    /* minimal example of progressbar javascript */
+  // window.onload = function onLoad() {
+  //     var card = $("#containcr4");
+  //     var position = card.position();
+  //     if(position.left < 500){
+  //         $(".myheader").css("width","485px");
+  //     }
+  //     else{
+  //         $(".myheader").css("width","1044px");
+
+  //     }
+
+  //     ajaxupdatefn();
+  // };
+
+  // $(window).resize(function(){
+  //     var card = $("#containcr4");
+  //     var position = card.position();
+  //     if(position.left < 500){
+  //         $(".myheader").css("width","485px");
+  //     }
+  //     else{
+  //         $(".myheader").css("width","1044px");
+
+  //     }
+  // });
+
+	$(".ok-btn").click(function(){
+		var row = $(this).parent().parent();
+		var tds = row.find("td");
+		var rowdata = [];
+		var approver_email = $("#gemail").text();
+		var approver = $("#gname").text();
+		$.each(tds,function(e){
+			rowdata.push($(this).text());
+		});
+		console.log(rowdata[0] + rowdata[1]);
+
+		//ajax to update maintain list
+        $.ajax({
+            url : "updatemaintain/",
+            type : "POST",
+            data : {
+                machine_name : rowdata[1],
+                type : rowdata[2],
+                user_name : rowdata[0],
+                approver : approver,
+                email : approver_email,
+            },
+            success : function(json){
+
+                if(json=="success"){
+
+                }
+
+            },
+        });			
+
+	});
+
+	//csrf token fix
+	// This function gets cookie with a given name
+	function getCookie(name) {
+	    var cookieValue = null;
+	    if (document.cookie && document.cookie != '') {
+	        var cookies = document.cookie.split(';');
+	        for (var i = 0; i < cookies.length; i++) {
+	            var cookie = jQuery.trim(cookies[i]);
+	            // Does this cookie string begin with the name we want?
+	            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+	                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+	                break;
+	            }
+	        }
+	    }
+	    return cookieValue;
+	}
+	var csrftoken = getCookie('csrftoken');
+
+	/*
+	The functions below will create a header with csrftoken
+	*/
+
+	function csrfSafeMethod(method) {
+	    // these HTTP methods do not require CSRF protection
+	    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+	}
+	function sameOrigin(url) {
+	    // test that a given url is a same-origin URL
+	    // url could be relative or scheme relative or absolute
+	    var host = document.location.host; // host + port
+	    var protocol = document.location.protocol;
+	    var sr_origin = '//' + host;
+	    var origin = protocol + sr_origin;
+	    // Allow absolute or scheme relative URLs to same origin
+	    return (url == origin || url.slice(0, origin.length + 1) == origin + '/') ||
+	        (url == sr_origin || url.slice(0, sr_origin.length + 1) == sr_origin + '/') ||
+	        // or any other URL that isn't scheme relative or absolute i.e relative.
+	        !(/^(\/\/|http:|https:).*/.test(url));
+	}
+
+	$.ajaxSetup({
+	    beforeSend: function(xhr, settings) {
+	        if (!csrfSafeMethod(settings.type) && sameOrigin(settings.url)) {
+	            // Send the token to same-origin, relative URLs only.
+	            // Send the token only if the method warrants CSRF protection
+	            // Using the CSRFToken value acquired earlier
+	            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+	        }
+	    }
+	});
+
+
+});
+
+
+
+</script>
+
+</body>
+</html>

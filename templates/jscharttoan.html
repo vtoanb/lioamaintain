@@ -1,0 +1,143 @@
+<!--
+{% block extrahead %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/Chart.js/0.2.0/Chart.min.js" type="text/javascript"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+
+$( document ).ready(function() {
+    var data = {
+        labels: ['1', '5', '10', '15', '20', '25', '30'],
+        datasets: [
+            {
+                label: "Site Registrations in the Last 30 Days",
+                fillColor: "rgba(220,220,220,0.2)",
+                strokeColor: "rgba(220,220,220,1)",
+                pointColor: "rgba(220,220,220,1)",
+                pointStrokeColor: "#fff",
+                pointHighlightFill: "#fff",
+                pointHighlightStroke: "rgba(220,220,220,1)",
+                data: [1,2,3,4,1,2,3,1,1,1,1,1],
+            }
+        ]
+    };
+    var ctx = document.getElementById("myChart").getContext("2d");
+    var myLineChart = new Chart(ctx).Line(data);
+
+    setInterval(function(){getUpdateDat();},1000);
+
+    function getUpdateDat(){
+        $.ajax({
+            url : "ajaxgetupdatedat/",
+            type : "GET",
+            data : { ajax_test : $('#time_server').val()},
+            success : function(json){
+                $('#time_server_p').text(json.server_time);
+            },
+        });
+    };
+});
+
+
+
+
+</script>
+{% endblock %}
+
+{% block content %}
+<canvas id="myChart" width="650" height="450" ></canvas>
+{% endblock %}
+
+
+<hr size="1px">
+-->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>jQuery UI Datepicker - Default functionality</title>
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+  <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+  <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+  {% csrf_token %}
+
+  <link rel="stylesheet" href="/resources/demos/style.css">
+  <script>
+  $(window).load(function(){
+    
+  });
+
+//csrf token fix
+// This function gets cookie with a given name
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie != '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+var csrftoken = getCookie('csrftoken');
+
+/*
+The functions below will create a header with csrftoken
+*/
+
+function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+function sameOrigin(url) {
+    // test that a given url is a same-origin URL
+    // url could be relative or scheme relative or absolute
+    var host = document.location.host; // host + port
+    var protocol = document.location.protocol;
+    var sr_origin = '//' + host;
+    var origin = protocol + sr_origin;
+    // Allow absolute or scheme relative URLs to same origin
+    return (url == origin || url.slice(0, origin.length + 1) == origin + '/') ||
+        (url == sr_origin || url.slice(0, sr_origin.length + 1) == sr_origin + '/') ||
+        // or any other URL that isn't scheme relative or absolute i.e relative.
+        !(/^(\/\/|http:|https:).*/.test(url));
+}
+
+$.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+        if (!csrfSafeMethod(settings.type) && sameOrigin(settings.url)) {
+            // Send the token to same-origin, relative URLs only.
+            // Send the token only if the method warrants CSRF protection
+            // Using the CSRFToken value acquired earlier
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        }
+    }
+});
+
+
+});
+
+  </script>
+</head>
+<body>
+ 
+
+<tt id = "login_error"></tt>
+<form id="login_form" action="" method="post">
+  {{login_form}}
+  <input type="submit" value="login">
+</form> 
+
+
+ 
+</body>
+</html>
+
+
+
+
+
