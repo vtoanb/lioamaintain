@@ -386,25 +386,27 @@ $("document").ready(function(){
 	});
 
   $("#loginform").on('submit',function(e){
-  		e.preventDefault();
-  		var form = $("#loginform");
-  		var user = form.find("input:text").val();
-  		var password = form.find("input:password").val();
-  		$.ajax({
- 			url  : "ajaxlogin/",
- 			type : "POST",
- 			data : {
- 				"user" : user,
- 				"password" : password,
- 			},
- 			success : function(json){
- 				form.find("input").hide();
- 				$(".logoutpart").show();
- 				$(".logoutpart label:first-child").text("hello, "+ user);
- 				$("#gname").text(user);
- 				
- 			},
-  		});
+	e.preventDefault();
+	var form = $("#loginform");
+	var user = form.find("input:text").val();
+	var password = form.find("input:password").val();
+	if((user != "")&&(password != "")){
+	$.ajax({
+		url  : "ajaxlogin/",
+		type : "POST",
+		data : {
+			"user" : user,
+			"password" : password,
+		},
+		success : function(json){
+			form.find("input").hide();
+			$(".logoutpart").show();
+			$(".logoutpart label:first-child").text("hello, "+ user);
+			$("#gname").text(user);
+			
+		},
+	});
+  		}
   });
 
 
@@ -731,7 +733,8 @@ $("document").ready(function(){
         modalUserName = $("#gname").text();
         console.log(modalMachineName + modalMaintainType + modalUserName);
 
-        $.ajax({
+        if(modalUserName != "")
+		$.ajax({
             url : "ajaxdomaintain/",
             type: "POST",
             data: {
@@ -747,6 +750,9 @@ $("document").ready(function(){
                 $("#usr").hide();
             },
         });
+		else{
+			/* doing nothing */
+		}
     });
 
 
