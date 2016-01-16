@@ -26,7 +26,7 @@ SECRET_KEY = 'j5r^lux5u-nv47=eyvk=esx_h*69&+_s$qs+tezi4oz-%@psvw'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['lioa.local']
+#ALLOWED_HOSTS = ['lioa.local']
 
 
 # Application definition
@@ -147,8 +147,8 @@ MEDIA_URL = '/media/'
 
 STATIC_URL = '/static/'
 
-#STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-STATIC_ROOT = '/home/lioa/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+#STATIC_ROOT = '/home/lioa/static/'
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "staticfiles"),
