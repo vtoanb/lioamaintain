@@ -23,6 +23,7 @@ import operator
 def maintainlist(request):
     #update model
     #maintain_schedule.updateTimeRemainning()
+    """
     last_update = time_variable.objects.get(pk="1")
     now = timezone.localtime(timezone.now())
     
@@ -37,7 +38,7 @@ def maintainlist(request):
         if timespandelta > 10:
             time_variable.objects.filter(pk="1").update(last_update_maintain=now)
             #update time remain
-            maintain_schedule.updateTimeRemainning()
+            maintain_schedule.updateTimeRemainning()"""
 
     maintain_sch = maintain_schedule.objects.all()
     maintain_his             = maintain_history.objects.filter(maintain_approve=True).order_by('-maintain_approve_time')[:10]
@@ -289,7 +290,8 @@ def updateMaintain(request):
                                                              maintain_type = maintain_type,
                                                             )
                     new_maintain_time = timezone.localtime(timezone.now()) + timedelta(hours=int(maintain_type))
-                    maintain_schedule.objects.filter(pk=schedule.pk).update(maintain_time=new_maintain_time)
+                    maintain_schedule.objects.filter(pk=schedule.pk).update(maintain_time=new_maintain_time,\
+                                                                            maintain_time_remain=maintain_type)
 
                     response_data = "success"
             else:

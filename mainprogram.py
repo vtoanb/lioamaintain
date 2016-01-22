@@ -11,12 +11,15 @@ import serial
 import io
 import sqlite3 as db
 from datetime import datetime,timedelta
+#import schedule
+import time
 
 sqlDataMany = []
 sqlManyTime = datetime.now() + timedelta(minutes=10)
+checkMaintaintime_next = datetime.now()
 #execute limit for sqlMany record
-executeLimit = "2"
-dbName = 'db.test'
+executeLimit = "10"
+dbName = 'db.sqlite3'
 
 """ this function to shutdown meet deadline machine and update remain time
     get all rows @ django_social_app_maintain_schedule
@@ -27,7 +30,7 @@ dbName = 'db.test'
 
 #config serial
 
-ser = serial.Serial(port='/dev/ttyUSB0',baudrate=9600)
+ser = serial.Serial(port='/dev/ttyUSB0',baudrate=115200,timeout=30.0)
 
 
 def checkMaintaintime():
@@ -56,8 +59,11 @@ def checkMaintaintime():
             time_remain = maintain_time - now
 
             time_remain_hours = time_remain.days * 24 + time_remain.seconds // 3600
+            print "cal new remain: ",time_remain_hours,"--> in db: ", row[2]
+            print "now: ",now,"with maintain_time: ",maintain_time
             if time_remain_hours != row[2]:
                 #insert to sql command to update in database
+
                 newItem = (time_remain_hours,row[0])
                 sqlMany.append(newItem)
             #if time_remain_hours < 0:
@@ -109,11 +115,14 @@ def checkMaintaintime():
 """
 read command from UART
 update according counter database 
-command update-machine-xxx(counter)-xxx(energy)
+command rx update-machine-xxx(counter)-xxx(energy)
+command tx rstnewday-machine-xxx(counter)-xxx(energy)
+command tx fix-machine-xx(counter)-xxx(energy)
 """
 def updateCurrentCounter(machineName,machineCounter,machineEnergy):
     con = db.connect(dbName)
     cur = con.cursor()
+    global sqlDataMany
     try:
 
         # get today table with machine name, counter,history and id-of-history-record
@@ -127,12 +136,13 @@ def updateCurrentCounter(machineName,machineCounter,machineEnergy):
         todaydata = cur.execute(sql)
         x = todaydata.fetchall()
         if len(x) == 1:
-            # data exist, update it
+            print "data exist, update it"
             if machineCounter >= x[0][1] and machineEnergy > x[0][2]:
                 # proper data, add to update list
-                sqlDataMany.append((machineCounter,machineEnergy,x[0][3]))
+                sqlDataMany.append((machineCounter,machineEnergy,(x[0][3])))
                 print "append and wait for update:"
                 print sqlDataMany
+
             elif machineCounter < x[0][1] or machineEnergy < x[0][2]:
                 # send command to zigbee module to fix error data of board
                 v = 'fix-' + unicode(x[0][0]) + '-' + unicode(x[0][1]) + '-' + unicode(x[0][2])
@@ -141,20 +151,56 @@ def updateCurrentCounter(machineName,machineCounter,machineEnergy):
                 print "Error, data of counter is smaller in database!"
                 print v
         elif len(x) == 0:
-            # insert new data in new day
+            """ 
+                - insert new data in new day
+                - check if data is larger then most close day then re-calcute it
+                - send command to zigbee 
+            """
+            sql ="""SELECT counter, energy 
+            FROM django_social_app_counter_history
+            JOIN django_social_app_machine
+            ON django_social_app_counter_history.machine_id = django_social_app_machine.id
+            WHERE machine_name = \'""" + machineName + "\'" +\
+            "ORDER BY save_time DESC LIMIT 1"
+            lastdat = cur.execute(sql)
+            lastdat = lastdat.fetchone()
+            if len(lastdat) > 0:
+                lastdat = lastdat[0]
+                print "last data of" + machineName + " : " + lastdat
+                print "new data" + machineCounter + " : " + machineEnergy
+                # compare with latest data in database
+                # if larger then reset in zigbee module
+                if machineCounter >= lastdat[0] and machineEnergy >= lastdat[1]:
+                    machineCounter = machineCounter - lastdat[0]
+                    machineEnergy = machineEnergy = lastdat[1]
+                    #update new data to zigbee
+                    resetcmd = "rstnewday-" + machineName +"-" +\
+                     unicode(machineCounter) + "-" + unicode(machineEnergy)
+                    ser.write(resetcmd)
+                    ser.write(b'\n')
+                elif (machineCounter < lastdat[0] and machineEnergy > lastdat[1]) or\
+                     (machineCounter > lastdat[0] and machineEnergy < lastdat[1]):
+                    #in valid data
+                    machineCounter = 0
+                    machineEnergy = 0
+            
+            # the first data of machine or insert normally
             sql = "SELECT id FROM django_social_app_machine WHERE machine_name=\'"+machineName+"\'"
             machineid = cur.execute(sql)
             machineid = machineid.fetchall()
-            machineid = machineid[0][0]
-            sql = """
-            INSERT INTO django_social_app_counter_history(machine_id,counter,energy,save_time)
-            VALUES (""" + unicode(machineid) + "," + unicode(machineCounter) +\
-             "," + unicode(machineEnergy) + "," +\
-            "DATETIME('now','localtime'))"
-            print sql
-            cur.execute(sql)
-            con.commit()
-            print "insert new data for: " + machineName
+            if len(machineid):
+                machineid = machineid[0][0]
+                sql = """
+                INSERT INTO django_social_app_counter_history(machine_id,counter,energy,save_time)
+                VALUES (""" + unicode(machineid) + "," + unicode(machineCounter) +\
+                 "," + unicode(machineEnergy) + "," +\
+                "DATETIME('now','localtime'))"
+                print sql
+                cur.execute(sql)
+                con.commit()
+                print "insert new data for: " + machineName
+            else:
+                print "machine not exist"
 
         else:
             print "error!, too many data in one day"
@@ -167,6 +213,8 @@ Update many data to django_social_app_counter_history
 sqlDataMany : counter, energy, row_id
 """
 def executeSqlMany():
+    global sqlDataMany
+    global sqlManyTime
     #execute if time is over or record limit is break
     #print len(sqlDataMany)
     if len(sqlDataMany) > int(executeLimit) or sqlManyTime < datetime.now():
@@ -175,9 +223,10 @@ def executeSqlMany():
             cur = con.cursor()
             try:
                 for data in sqlDataMany:
-                    sql = " UPDATE django_social_app_counter_history" +\
+                    sql = " UPDATE django_social_app_counter_history " +\
                     "SET counter = " + unicode(data[0]) + ",energy=" + unicode(data[1])+\
-                    "WHERE id=" + unicode(data[2])
+                    " WHERE id=" + unicode(data[2])
+                    print sql
                     cur.execute(sql)
                 con.commit()
                 # reset sqlDataMany
@@ -192,27 +241,39 @@ def executeSqlMany():
 
 
 def updateCounter():
+    print "read new line \r\n"
     line = ser.readline().replace('\n','')
-    if "update" in line:
-        #data = line.split("-")
-        #machine = data[1]
-        #counter = data[2]
-        #energy  = data[3]
-        append_dat = (data[1],data[2],data[3])
-        sqlDataMany.append(append_dat)
+    if 'update' in line:
+        line = line.split('-')
+        if len(line) == 4:
+            machine = line[1]
+            counter = int(line[2])
+            energy  = int(line[3])
+            #checkMaintaintime()
+            #print "update counter history database"
+            updateCurrentCounter(machine,counter,energy)
+            print "try to execute waiting list to database"
+            executeSqlMany()
 
 
 
 
 
 def main():
-    print "execute updatemaintaintime"
-    #checkMaintaintime()
-    updateCurrentCounter('K4',100,202)
-    updateCurrentCounter('A3',1,4)
-    updateCurrentCounter('K5',1000,2002)
-    executeSqlMany()
-    ser.close()
+    #schedule.every(10).minutes.do(checkMaintaintime)
+    global checkMaintaintime_next
+    checkMaintaintime_next = datetime.now()
+
+    try:
+        while 1:
+            print "Before: ", datetime.now()
+            updateCounter()
+            print "After : ", datetime.now()
+            
+
+    finally:
+        print "close serial port"
+        ser.close()
 
 if __name__ == '__main__':     # if the function is the main function ...
     main() # ...call it
