@@ -1,8 +1,8 @@
 """
 this code to do flowing tasks:
-1. Update maintain_remaintime of all machines in database
-2. Read counter from zigbee and update in database
-3. Send command to zigbee to disable machine if it's maintain_remaintime < 0
+1. Parsing command from Zm->UART,
+2. Update data if exist and data is properly
+3. If data not exist then create new data in counter_history
 
 """
 
@@ -21,95 +21,90 @@ checkMaintaintime_next = datetime.now()
 executeLimit = "10"
 dbName = 'db.sqlite3'
 
-""" this function to shutdown meet deadline machine and update remain time
-    get all rows @ django_social_app_maintain_schedule
-    if calculated remaintime different maintain_time in table then update it
-    if calculated maintain time smaller than zero then disable machine
+#dictionary of machine name and short address
+machine_name_dict = {}
 
-"""
-
-#config serial
 
 ser = serial.Serial(port='/dev/ttyUSB0',baudrate=19200,timeout=30.0)
 
+def convertcmd2bytes(shortadd,energy,product):
+    cmd = (shortadd).to_bytes(2,'big') + (energy).to_bytes(2,'big') + (product).to_bytes(2,'big')
+    return cmd
 
+def parsecommandfromzm():
+    line = ser.readline()
+    print(line)
+    
+    new = str(line).split("\'")[1]
+    new = new.replace("\r\n","")
+    parse           = new.split(" ")[1:]
+    if len(parse) > 24: 
+        # header parsing
+        #im_len          = parse[0]
+        #im_type         = parse[1] + parse[2]
+        #im_group        = parse[3] + parse[4]
+        #im_cluster      = parse[5] + parse[6]
+        im_src_add       = parse[8] + parse[7]
+        #im_src_endpoint = parse[9]
+        #im_des_endpoint = parse[10]
+        #im_was_brdcast  = parse[11]
+        #im_lqi          = parse[12]
+        #im_sec          = parse[13]
+        #im_seq          = parse[18]
+        #im_pay          = parse[19]
+        # msg parsing
+        im_msg_cmd      = parse[20]
+        im_msg_name     = parse[21] + parse[22]
+        im_msg_energy   = parse[23] + parse[24]
+        im_msg_product  = parse[25] + parse[26]
+        return (im_src_add, im_msg_name, im_msg_cmd, im_msg_energy, im_msg_product)
+    else:
+        return (None, None, None, None)
+
+""" this function to shutdown meet deadline machine and update remain time
+"""
 def checkMaintaintime():
     # connect database
     con = db.connect(dbName)
     cur = con.cursor()
-    
+    # get short address from machine name
+    global machine_name_dict
     try:
-        rows = cur.execute("select * from django_social_app_maintain_schedule")
+        sql = """
+        SELECT machine_name, maintain_time 
+        FROM django_social_app_maintain_schedule 
+        JOIN django_social_app_machine
+        ON django_social_app_maintain_schedule.machine_id = django_social_app_machine.id 
+        """
+        rows = cur.execute(sql)
         # fetchall return type is 'list'
         rows = rows.fetchall()
 
-        """ iterate all row and update maintain time if need
-        0 : id
-        1 : type
-        2 : remain
-        3 : machine_id
-        4 : maintain_time
-        """
-        sqlMany =  []
-        #disableMachine = []
+        
         for row in rows:
-            maintain_time = row[4].split(".")[0]
-            maintain_time = datetime.strptime(maintain_time, "%Y-%m-%d %H:%M:%S")
+            maintain_time = datetime.strptime(row.maintain_time, "%Y-%m-%d %H:%M:%S")
             now = datetime.now()
             time_remain = maintain_time - now
-
             time_remain_hours = time_remain.days * 24 + time_remain.seconds // 3600
-            print "cal new remain: ",time_remain_hours,"--> in db: ", row[2]
-            print "now: ",now,"with maintain_time: ",maintain_time
-            if time_remain_hours != row[2]:
-                #insert to sql command to update in database
-
-                newItem = (time_remain_hours,row[0])
-                sqlMany.append(newItem)
-            #if time_remain_hours < 0:
-            #    disableMachine.append(row[3])
-        #in the end execute all update element
-        if len(sqlMany) > 0:
-            try:
-                print "try to update to database"
-                cur.executemany("update django_social_app_maintain_schedule set maintain_time_remain=? where id=?",sqlMany)
-                con.commit()
-                print "update success!"
-
-            except:
-                print('update remain fail')
-        else:
-            print " nothing to update to database"
-
-        #get the list of disable machien and then send to zigbee
-        sql = """SELECT machine_name
-        FROM django_social_app_machine
-        JOIN django_social_app_maintain_schedule 
-        ON django_social_app_machine.id = django_social_app_maintain_schedule.machine_id
-        WHERE maintain_time_remain < 0
-        """
-        x = cur.execute(sql)
-        command = x.fetchall()
-        dismac = []
-
-
-        for c in command:
-            if c[0] not in dismac:
-                dismac.append(c[0])
-                v = unicode('shutdown-' + c[0] )
-                ser.write(v)
-                ser.write(b'\n')
-        ser.write(b'\n')
-        
-
-        print dismac
+           
+            if time_remain_hours < 0:
+                disableMachine.append(row[3])
+                #send command to module to disable machine
+                if row.machine_name in machine_name_dict:
+                    machineAdd = machine_name_dict[row.machine_name]
+                    ser.write(b'<X')
+                    ser.write(bytearray(row.machine_name,'utf-8'))
+                    ser.write((int('0x'+machineAdd,16)).to_bytes(2,'big'))
+                    ser.write(b'XXXX')
+                else:
+                    print("Disable-Machine Address Missing")
 
     except:
-        print "update fail"
+        print("update fail")
 
     finally:
         con.close()
-        print "close database"
+        print("close database")
 
 
 """
@@ -119,7 +114,7 @@ command rx update-machine-xxx(counter)-xxx(energy)
 command tx rstnewday-machine-xxx(counter)-xxx(energy)
 command tx fix-machine-xx(counter)-xxx(energy)
 """
-def updateCurrentCounter(machineName,machineCounter,machineEnergy):
+def updateCurrentCounter(machineName,machineAdd,machineCounter,machineEnergy):
     con = db.connect(dbName)
     cur = con.cursor()
     global sqlDataMany
@@ -136,54 +131,22 @@ def updateCurrentCounter(machineName,machineCounter,machineEnergy):
         todaydata = cur.execute(sql)
         x = todaydata.fetchall()
         if len(x) == 1:
-            print "data exist, update it"
-            if machineCounter >= x[0][1] and machineEnergy > x[0][2]:
+            print("data exist, update it")
+            if int(machineCounter) >= x[0][1] and int(machineEnergy) > x[0][2]:
                 # proper data, add to update list
-                sqlDataMany.append((machineCounter,machineEnergy,(x[0][3])))
-                print "append and wait for update:"
-                print sqlDataMany
+                sqlDataMany.append((int(machineCounter),int(machineEnergy),(x[0][3])))
+                print("append and wait for update:")
+                print(sqlDataMany)
 
-            elif machineCounter < x[0][1] or machineEnergy < x[0][2]:
+            elif int(machineCounter) < x[0][1] and int(machineEnergy) < x[0][2]:
                 # send command to zigbee module to fix error data of board
-                v = 'fix-' + unicode(x[0][0]) + '-' + unicode(x[0][1]) + '-' + unicode(x[0][2])
-                ser.write(v)
-                ser.write('\n')
-                print "Error, data of counter is smaller in database!"
-                print v
+                ser.write(b'<E')
+                ser.write(bytearray(machineName,'utf-8'))
+                ser.write((int('0x'+machineAdd,16)).to_bytes(2,'big'))
+                ser.write((int('0x'+machineEnergy,16)).to_bytes(2,'big'))
+                ser.write((int('0x'+machineCounter,16)).to_bytes(2,'big'))
+                print("Error, data of counter is smaller in database!")
         elif len(x) == 0:
-            """ 
-                - insert new data in new day
-                - check if data is larger then most close day then re-calcute it
-                - send command to zigbee 
-            """
-            sql ="""SELECT counter, energy 
-            FROM django_social_app_counter_history
-            JOIN django_social_app_machine
-            ON django_social_app_counter_history.machine_id = django_social_app_machine.id
-            WHERE machine_name = \'""" + machineName + "\'" +\
-            "ORDER BY save_time DESC LIMIT 1"
-            lastdat = cur.execute(sql)
-            lastdat = lastdat.fetchone()
-            if len(lastdat) > 0:
-                lastdat = lastdat[0]
-                print "last data of" + machineName + " : " + lastdat
-                print "new data" + machineCounter + " : " + machineEnergy
-                # compare with latest data in database
-                # if larger then reset in zigbee module
-                if machineCounter >= lastdat[0] and machineEnergy >= lastdat[1]:
-                    machineCounter = machineCounter - lastdat[0]
-                    machineEnergy = machineEnergy = lastdat[1]
-                    #update new data to zigbee
-                    resetcmd = "rstnewday-" + machineName +"-" +\
-                     unicode(machineCounter) + "-" + unicode(machineEnergy)
-                    ser.write(resetcmd)
-                    ser.write(b'\n')
-                elif (machineCounter < lastdat[0] and machineEnergy > lastdat[1]) or\
-                     (machineCounter > lastdat[0] and machineEnergy < lastdat[1]):
-                    #in valid data
-                    machineCounter = 0
-                    machineEnergy = 0
-            
             # the first data of machine or insert normally
             sql = "SELECT id FROM django_social_app_machine WHERE machine_name=\'"+machineName+"\'"
             machineid = cur.execute(sql)
@@ -192,21 +155,21 @@ def updateCurrentCounter(machineName,machineCounter,machineEnergy):
                 machineid = machineid[0][0]
                 sql = """
                 INSERT INTO django_social_app_counter_history(machine_id,counter,energy,save_time)
-                VALUES (""" + unicode(machineid) + "," + unicode(machineCounter) +\
-                 "," + unicode(machineEnergy) + "," +\
+                VALUES (""" + str(machineid) + "," + str(machineCounter) +\
+                 "," + str(machineEnergy) + "," +\
                 "DATETIME('now','localtime'))"
-                print sql
+                print(sql)
                 cur.execute(sql)
                 con.commit()
-                print "insert new data for: " + machineName
+                print("insert new data for: ",machineName)
             else:
-                print "machine not exist"
+                print("machine not exist")
 
         else:
-            print "error!, too many data in one day"
+            print("error!, too many data in one day")
     finally:    
         for i in todaydata:
-            print i
+            print(i)
         con.close()
 """
 Update many data to django_social_app_counter_history
@@ -224,9 +187,9 @@ def executeSqlMany():
             try:
                 for data in sqlDataMany:
                     sql = " UPDATE django_social_app_counter_history " +\
-                    "SET counter = " + unicode(data[0]) + ",energy=" + unicode(data[1])+\
-                    " WHERE id=" + unicode(data[2])
-                    print sql
+                    "SET counter = " + str(data[0]) + ",energy=" + str(data[1])+\
+                    " WHERE id=" + str(data[2])
+                    print(sql)
                     cur.execute(sql)
                 con.commit()
                 # reset sqlDataMany
@@ -241,7 +204,8 @@ def executeSqlMany():
 
 
 def updateCounter():
-    print "read new line \r\n"
+    """
+    print("read new line \r\n")
     line = ser.readline().replace('\n','')
     if 'update' in line:
         line = line.split('-')
@@ -254,6 +218,25 @@ def updateCounter():
             updateCurrentCounter(machine,counter,energy)
             print "try to execute waiting list to database"
             executeSqlMany()
+    """
+    global machine_name_dict
+
+    rxadd,rxname, rxcmd,rxenergy,rxproduct = parsecommandfromzm()
+    if rxadd != None && rxname != None:
+        # update machine short address in global dictionary
+        machine_name_dict[rxname] = rxadd;
+        # let execute command from zigbee module
+        if(rxcmd == 'U'):
+            updateCurrentCounter(rxmachine, rxadd, rxproduct, rxenergy)
+            # execute update many
+             executeSqlMany() 
+        else:
+            """ doing nothing !"""
+
+
+
+
+
 
 
 
@@ -266,13 +249,13 @@ def main():
 
     try:
         while 1:
-            print "Before: ", datetime.now()
+            print("Before: ", datetime.now()) 
             updateCounter()
-            print "After : ", datetime.now()
+            print("After : ", datetime.now())
             
 
     finally:
-        print "close serial port"
+        print("close serial port")
         ser.close()
 
 if __name__ == '__main__':     # if the function is the main function ...
