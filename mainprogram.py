@@ -30,7 +30,7 @@ dbName = 'db.sqlite3'
 
 #config serial
 
-ser = serial.Serial(port='/dev/ttyUSB0',baudrate=115200,timeout=30.0)
+ser = serial.Serial(port='/dev/ttyUSB0',baudrate=19200,timeout=30.0)
 
 
 def checkMaintaintime():
