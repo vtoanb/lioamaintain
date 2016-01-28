@@ -44,19 +44,10 @@ try:
 				im_seq 			= parse[18]
 				im_pay 			= parse[19]
 				# msg parsing
-				im_msg 			= parse[20:25]
 				im_msg_cmd      = parse[20]
 				im_msg_name     = parse[21] + parse[22]
 				im_msg_energy   = '0x' + parse[23] + parse[24]
 				im_msg_product  = '0x' + parse[25] + parse[26]
-				#if im_len == '2E':
-				#print("len: ",im_len," type: ",im_type," group: ",im_group," cluster: ",im_cluster,\
-				#	 " SrcAd: ",im_src_add," SrcEnd: ",im_src_endpoint,"DesEnd: ",im_des_endpoint,\
-				#	 " Broad? ",im_was_brdcast," .LQI: ",im_lqi," .SEC? ",im_sec," .nSEQ: ",\
-				#	 im_seq," .payLoad: ",im_pay,"\r\n")
-				print("Module Address: %d\r\n",im_src_add,type(im_src_add),type(parse[0]))
-				print("Module Energy: %d\r\n",im_msg_energy)
-				print("Module Product: %d\r\n",im_msg_product)
 				
 		elif kcmd == 'W':
 			"""

@@ -38,7 +38,8 @@ def parsecommandfromzm():
     new = str(line).split("\'")[1]
     new = new.replace("\r\n","")
     parse           = new.split(" ")[1:]
-    if len(parse) > 24: 
+    #print(len(parse),'\r\n')
+    if len(parse) == 28: 
         # header parsing
         #im_len          = parse[0]
         #im_type         = parse[1] + parse[2]
@@ -144,7 +145,7 @@ def updateCurrentCounter(machineName,machineAdd,machineCounter,machineEnergy):
 
             elif (machineCounter) < x[0][1] and (machineEnergy) < x[0][2]:
                 # send command to zigbee module to fix error data of board
-                
+                print("send reset command for ZM!")
                 ser.write(b'<R')
                 ser.write(bytearray(machineName,'utf-8'))
                 ser.write((int('0X'+machineAdd,16)).to_bytes(2,'big'))
@@ -177,8 +178,8 @@ def updateCurrentCounter(machineName,machineAdd,machineCounter,machineEnergy):
                 ser.write(b'<C')
                 ser.write(bytearray(machineName,'utf-8'))
                 ser.write((int('0X'+machineAdd,16)).to_bytes(2,'big'))
-                ser.write((x[0][2]).to_bytes(2,'big'))
-                ser.write((x[0][1]).to_bytes(2,'big'))
+                ser.write(b'0000')
+                #ser.write(b')
             else:
                 """ Proper new data """
                 if len(machineid):
@@ -263,7 +264,7 @@ def updateCounter():
             # execute update many
             executeSqlMany() 
         else:
-            """ doing nothing !"""
+            """do nothing"""
 
 
 
@@ -281,9 +282,9 @@ def main():
 
     try:
         while 1:
-            print("Before: ", datetime.now()) 
+            #print("Before: ", datetime.now()) 
             updateCounter()
-            print("After : ", datetime.now())
+            #print("After : ", datetime.now())
             
 
     finally:

@@ -222,8 +222,16 @@
 	</div>
 
 	<!-- generated code for machine here-->
+	<div hidden>
+		{%for item in x%}
+		<p>{{item}}</p>
+		<p>{{item.0}}</p>
+		<p>{{item.2}}</p>
+		{%endfor%}
+	</div>
 	<div class="w3-col m6" id="containcr4">
-		{%for machine in machines %}
+<!--
+	{%for machine in machines %}
 	<div class="w3-col l3 m10 s10 w3-card-2 w3-white" id="cr-brief">
 		<div class="w3-row">
 			<div class="w3-col s3 brief-label-btn" id="cr-brief-label">
@@ -232,7 +240,6 @@
 			<div class="w3-col s9">
 				
 				<div class="w3-row w3-red" id="cr-brief-label-maintain">
-				
 					{%for maintain in maintains%}
 					{%if machine.machine_name == maintain.machine.machine_name%}
 					<div class="w3-col s4 w3-center">
@@ -245,9 +252,10 @@
 				<div class="w3-row">
 					{%for maintain in maintains%}
 						{%if machine.machine_name == maintain.machine.machine_name%}
-							<div class="w3-col s4 w3-large w3-center">
+							<div class="w3-col s4 w3-large w3-center calc-time-remain">
 						{{maintain.maintain_time_remain}}
 							</div>
+							<div hidden>{{maintain.maintain_time}}</div>
 						{%endif%}
 					{%endfor%}
 				</div>
@@ -266,6 +274,50 @@
 		</div>
 	</div>
 	{%endfor%}
+-->
+
+	{%for machine in machines %}
+	<div class="w3-col l3 m10 s10 w3-card-2 w3-white" id="cr-brief">
+		<div class="w3-row">
+			<div class="w3-col s3 brief-label-btn" id="cr-brief-label">
+				{{machine.machine_name}}
+			</div>
+			<div class="w3-col s9">
+				
+				<div class="w3-row w3-red" id="cr-brief-label-maintain">
+					{%for i in x%}
+					{%if i.0 == machine.machine_name%}
+						<div class="w3-col s4 w3-center">
+							{{i.1}}
+						</div>
+					{%endif%}
+					{%endfor%}
+				</div>
+				<div class="w3-row">
+					{%for i in x%}
+						{%if i.0 == machine.machine_name%}
+							<div class="w3-col s4 w3-large w3-center calc-time-remain">
+								{{i.2}}
+							</div>
+						{%endif%}
+					{%endfor%}
+				</div>
+				<div class="w3-row maintainchoices">
+					{%for i in x%}
+					{%if i.0 == machine.machine_name%}
+						<div class="w3-col s4 w3-center">
+							<input type="radio" name={{machine.machine_name}} value={{i.1}} 
+							                       {%if i.2 >= 10 %}disabled{%endif%} >
+						</div>
+					{%endif%}
+					{%endfor%}	
+				</div>
+
+			</div>
+		</div>
+	</div>
+	{%endfor%}
+
 
 		<div class="modal fade" id="myModal" role="dialog">
 		    <div class="modal-dialog modal-sm">
@@ -355,8 +407,19 @@ $("document").ready(function(){
 
     ajaxupdatefn();
 
-     
+    /* calculate maintain-remain time on load 
+    $(".calc-time-remain").each(function(){
+    	var txt = $(this).next().text();
+    	var now = $("#time-now").text();
+    	var d = new Date(now);
+    	$(this).text(now);
+    	console.log(txt);
+    });
+*/
+
+
   };
+
   /* window scroll handler */
   	//when scroll
 	$(window).scroll(function(){

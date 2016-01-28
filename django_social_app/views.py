@@ -21,24 +21,8 @@ import operator
 
 
 def maintainlist(request):
-    #update model
-    #maintain_schedule.updateTimeRemainning()
-    """
-    last_update = time_variable.objects.get(pk="1")
-    now = timezone.localtime(timezone.now())
-    
 
-    if not last_update:
-        newtime = time_variable(last_update_maintain=now)
-        newtime.save()
-        maintain_schedule.updateTimeRemainning()
-    else:
-        timespan = now - last_update.last_update_maintain
-        timespandelta = timespan.days * 24 * 60 + timespan.seconds / 60
-        if timespandelta > 10:
-            time_variable.objects.filter(pk="1").update(last_update_maintain=now)
-            #update time remain
-            maintain_schedule.updateTimeRemainning()"""
+    now = timezone.localtime(timezone.now())
 
     maintain_sch = maintain_schedule.objects.all()
     maintain_his             = maintain_history.objects.filter(maintain_approve=True).order_by('-maintain_approve_time')[:10]
@@ -50,6 +34,14 @@ def maintainlist(request):
     staffs = staff.objects.all()
     maintains = maintain_schedule.objects.all()
 
+    """ create list for maintain """
+    maintain_machines = maintain_schedule.objects.all().prefetch_related('machine').order_by('machine__machine_name')
+    x = []
+    for m in maintain_machines:
+        timedif = m.maintain_time - now
+        timedif = timedif.days * 24 + timedif.seconds // 3600
+        x.append((m.machine.machine_name,m.maintain_type,timedif))
+
     return render(request, 'maintainlist.html',{
         'maintain_schedule' : maintain_sch,
         'maintain_history'  : maintain_his,
@@ -57,8 +49,9 @@ def maintainlist(request):
         'machines':machines,
         'staffs':staffs,
         'maintains':maintains,
-        'time':timezone.localtime(timezone.now()),
+        'time': now,
         'default_machine':default_machine,
+        'x':x,
         })
 
 
@@ -228,7 +221,6 @@ def getDoMaintain(request):
         #check if maintain request exist
         maintain_items = maintain_schedule.objects.filter(machine__machine_name = machine_name,\
                                                          maintain_type = maintain_type,\
-                                                         maintain_time_remain__lt = 10,
                                                         )
         for maintain in maintain_items:
             print(maintain.machine.machine_name)
