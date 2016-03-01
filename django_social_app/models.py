@@ -14,28 +14,38 @@ class machine(models.Model):
 	machine_name = models.CharField(max_length=30)
 	created_date = models.DateTimeField('created date')
 	# total power of machine in present day
-	energy_today = models.IntegerField(default=0)
+	#energy_today = models.IntegerField(default=0)
+
+	counter_size = models.IntegerField(default=0)
+	counter_size_2 = models.IntegerField(default=0)
+	counter_size_3 = models.IntegerField(default=0)
+	counter_size_4 = models.IntegerField(default=0)
+	counter_size_5 = models.IntegerField(default=0)
 
 	def __str__(self):
 		return self.machine_name
 
 	class meta:
 		ordering = ['machine_name']
-	
 
-		
+
+
 
 class energy_history(models.Model):
 	machine = models.ForeignKey(machine, on_delete=models.CASCADE)
 	energy = models.IntegerField()
 	save_time = models.DateTimeField('energy save time')
 
-    
+
 
 
 class counter_history(models.Model):
 	machine = models.ForeignKey(machine, on_delete=models.CASCADE)
-	counter = models.IntegerField()
+	counter = models.IntegerField(default=0)
+	counter_2 = models.IntegerField(default=0)
+	counter_3 = models.IntegerField(default=0)
+	counter_4 = models.IntegerField(default=0)
+	counter_5 = models.IntegerField(default=0)
 	energy = models.IntegerField()
 	save_time = models.DateTimeField('counter save time')
 
@@ -77,7 +87,7 @@ class maintain_schedule(models.Model):
 			#print(maintain.machine.machine_name)
 
 	class meta:
-		ordering = ["machine"]		
+		ordering = ["machine"]
 
 
 
@@ -113,9 +123,3 @@ def my_handerstaffuser(sender, instance, **kwargs):
 		user = User.objects.create_user(username=new_staff_member.username,\
 										email = new_staff_member.email,\
 										password)"""
-
-
-
-
-
-

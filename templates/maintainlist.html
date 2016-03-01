@@ -25,13 +25,13 @@
 
 
 <div class="w3-containner parentheaderTemp w3-card-2  w3-white resizesmall">
-	
+
 	{% load staticfiles %}
 	<div class="w3-row tempLogo">
 		<div class="w3-col l6">
 			<img src="{% static "logomod.png" %}" alt="lioalogo" width="110" height="30">
 		</div>
-		<div class="w3-col l6">			
+		<div class="w3-col l6">
 			<form id="loginform" action="" method="post" class="w3-right">
 				{% csrf_token %}
 				{% if not user or user.is_anonymous %}
@@ -50,12 +50,12 @@
 				</div>
 			</form>
 		</div>
-		
+
 	</div>
 	<div class="w3-row temp_myheader w3-white w3-border-top resizesmall">
 		<div class="w3-col l1  w3-padding-left w3-large  confirm-btn" width="40">Confirm</div>
 		<div class="w3-col l1  w3-padding-left w3-large  history-btn" width="40">History</div>
-		<div class="w3-col l1  w3-padding-left w3-large  counter-btn" width="40">Counter</div>		
+		<div class="w3-col l1  w3-padding-left w3-large  counter-btn" width="40">Counter</div>
 	</div>
 </div>
 
@@ -170,9 +170,9 @@
 		<div class="w3-row l3 m10 s10 w3-card-2 w3-white" id="cr4short">
 			<div class="w3-col w3-text-red s2 w3-border-right w3-xxlarge" >
 				<input type="text" value="{{default_machine}}" id="ctrlbar_machine_name">
-				
+
 			</div>
-			
+
 			<div class="w3-col s4 w3-center">
 				<div class="w3-row s3 w3-xlarge"> <input type="text" value={{time.year}}  id="ctrlbar_year"> </div>
 				<div class="w3-row s3 w3-xlarge"> <input type="text" value={{time.month}} id="ctrlbar_month"> </div>
@@ -180,15 +180,15 @@
 
 
 			<div class="w3-col s2 w3-center w3-xlarge">
-				<div class="w3-row s2"> 
+				<div class="w3-row s2">
 					<button class="w3-btn w3-white material-icons w3-round-jumbo" id="ctrlbar_next">keyboard_arrow_right</button> </div>
-				<div class="w3-row s2"> 
+				<div class="w3-row s2">
 					<button class="w3-btn w3-white material-icons w3-round-jumbo" id="ctrlbar_prev">update</button> </div>
 			</div>
 
 
 		</div>
-		
+
 		<div class="w3-row l3 m10 s10 w3-card-2 w3-white" id="cr4-enlarge">
 
 			<!-- k4 bao tri + counter -->
@@ -199,7 +199,7 @@
 			</div>
 			<div class="w3-row">
 				<div class="w3-containner w3-center">
-					<canvas id="myChart" width="460" height="260"></canvas>	
+					<canvas id="myChart" width="460" height="260"></canvas>
 				</div>
 			</div>
 
@@ -212,12 +212,12 @@
 			<div class="w3-containner w3-center">
 				<canvas id="myChartE2" width="460" height="260"></canvas>
 			</div>
-				
+
 		</div>
 
 
 
-		
+
 
 	</div>
 
@@ -238,13 +238,13 @@
 				{{machine.machine_name}}
 			</div>
 			<div class="w3-col s9">
-				
+
 				<div class="w3-row w3-red" id="cr-brief-label-maintain">
 					{%for maintain in maintains%}
 					{%if machine.machine_name == maintain.machine.machine_name%}
 					<div class="w3-col s4 w3-center">
 						{{maintain.maintain_type}}
-						
+
 					</div>
 					{%endif%}
 					{%endfor%}
@@ -263,11 +263,11 @@
 					{%for maintain in maintains%}
 					{%if machine.machine_name == maintain.machine.machine_name%}
 					<div class="w3-col s4 w3-center">
-						<input type="radio" name={{machine.machine_name}} value={{maintain.maintain_type}} 
+						<input type="radio" name={{machine.machine_name}} value={{maintain.maintain_type}}
 						                       {%if maintain.maintain_time_remain >= 10 %}disabled{%endif%} >
 					</div>
 					{%endif%}
-					{%endfor%}	
+					{%endfor%}
 				</div>
 
 			</div>
@@ -283,7 +283,7 @@
 				{{machine.machine_name}}
 			</div>
 			<div class="w3-col s9">
-				
+
 				<div class="w3-row w3-red" id="cr-brief-label-maintain">
 					{%for i in x%}
 					{%if i.0 == machine.machine_name%}
@@ -306,11 +306,11 @@
 					{%for i in x%}
 					{%if i.0 == machine.machine_name%}
 						<div class="w3-col s4 w3-center">
-							<input type="radio" name={{machine.machine_name}} value={{i.1}} 
+							<input type="radio" name={{machine.machine_name}} value={{i.1}}
 							                       {%if i.2 >= 10 %}disabled{%endif%} >
 						</div>
 					{%endif%}
-					{%endfor%}	
+					{%endfor%}
 				</div>
 
 			</div>
@@ -321,7 +321,7 @@
 
 		<div class="modal fade" id="myModal" role="dialog">
 		    <div class="modal-dialog modal-sm">
-		    
+
 		      <!-- Modal content-->
 		      <div class="modal-content w3-center">
 		        <div class="modal-header">
@@ -334,15 +334,15 @@
 					</div>
 		          <button type="button" class="w3-btn w3-red w3-round-xlarge" id="modalMaintainBtn" >maintain</button>
 		      </div>
-		      
+
 		    </div>
 
 		</div>
 
 	</div>
-	
+
 </div>
-	
+
 
 
 
@@ -391,13 +391,13 @@ $("document").ready(function(){
    		$(".resizesmall").css("width","485px");
    		$(".small-hide").hide();
    		$(".small-show").show();
-   		$(".rescale-large-hide").show(); 
+   		$(".rescale-large-hide").show();
   	}
   	else{
    		$(".resizesmall").css("width","1006px");
    		$(".small-hide").show();
    		$(".small-show").hide();
-   		$(".rescale-large-hide").hide(); 			  		
+   		$(".rescale-large-hide").hide();
   	}
 
 	$(".normal-large-hide").hide();
@@ -407,7 +407,7 @@ $("document").ready(function(){
 
     ajaxupdatefn();
 
-    /* calculate maintain-remain time on load 
+    /* calculate maintain-remain time on load
     $(".calc-time-remain").each(function(){
     	var txt = $(this).next().text();
     	var now = $("#time-now").text();
@@ -466,7 +466,7 @@ $("document").ready(function(){
 			$(".logoutpart").show();
 			$(".logoutpart label:first-child").text("hello, "+ user);
 			$("#gname").text(user);
-			
+
 		},
 	});
   		}
@@ -497,9 +497,9 @@ $("document").ready(function(){
 		 	"</tr><tr class='normal-large-hide-add table-data'>"+"<td colspan='6'><ul><li class='rescale-large-hide-add'>Maintainer    : "+
 			item[0]+"</li><li class='rescale-large-hide-add'>Maintain Type : "+ item[2]+"</li><li>Maintain time : "+
 			item[5].split('.')[0] +"</li><li>Raise time    : "+item[6].split('.')[0] +"</li><li>Approve time  : "+
-			item[7].split('.')[0] + "</li><li class='rescale-large-hide-add'>Comment       : "+item[4]+"</li></ul></td></tr>";	
+			item[7].split('.')[0] + "</li><li class='rescale-large-hide-add'>Comment       : "+item[4]+"</li></ul></td></tr>";
 
-			$("table.table-head").append(x);        	
+			$("table.table-head").append(x);
 	        });
 
 	        var width = $(window).width();
@@ -508,13 +508,13 @@ $("document").ready(function(){
 		   		$(".resizesmall").css("width","485px");
 		   		$(".small-hide-add").hide();
 		   		$(".small-show-add").show();
-		   		$(".rescale-large-hide-add").show(); 
+		   		$(".rescale-large-hide-add").show();
 		  	}
 		  	else{
 		   		$(".resizesmall-add").css("width","1006px");
 		   		$(".small-hide-add").show();
 		   		$(".small-show-add").hide();
-		   		$(".rescale-large-hide-add").hide(); 			  		
+		   		$(".rescale-large-hide-add").hide();
 		  	}
 		  	/* bind handler for resize */
 		  	$(window).bind("resize",function(){
@@ -527,9 +527,9 @@ $("document").ready(function(){
 		  			$(".small-hide-add").show();
 		  			$(".rescale-large-hide-add").hide();
 		  		}
-		  		
+
 		  	});
-		  		
+
         	$(".normal-large-hide-add").hide();
 
 			$(".large-expand-btn-add").click(function(){
@@ -601,13 +601,13 @@ $("document").ready(function(){
    		$(".resizesmall").css("width","485px");
    		$(".small-hide").hide();
    		$(".small-show").show();
-   		$(".rescale-large-hide").show(); 
+   		$(".rescale-large-hide").show();
   	}
   	else{
    		$(".resizesmall").css("width","1006px");
    		$(".small-hide").show();
    		$(".small-show").hide();
-   		$(".rescale-large-hide").hide(); 			  		
+   		$(".rescale-large-hide").hide();
   	}
 
   	aboveHeight = $(".temp_myheader").outerHeight();
@@ -631,7 +631,7 @@ $("document").ready(function(){
 		/* restore this modal title and ok button */
 		$(".modal-title-confirm").text("Confirm this maintain?");
 		$("#modalMaintainBtn-confirm").show();
-        $(".myModal-Confirm").modal({backdrop: false});		
+        $(".myModal-Confirm").modal({backdrop: false});
 	});
 
 	$("#modalMaintainBtn-confirm").click(function(){
@@ -696,7 +696,7 @@ $("document").ready(function(){
                 }
 
             },
-        });			
+        });
 
 	});
 
@@ -789,9 +789,9 @@ $("document").ready(function(){
 
     // $("#myModal").on('hide.bs.modal',function(e){
     // });
-    
+
     $("#modalMaintainBtn").click(function(){
-        
+
         modalComment = $("#usr").val();
         modalUserName = $("#gname").text();
         console.log(modalMachineName + modalMaintainType + modalUserName);
@@ -819,7 +819,7 @@ $("document").ready(function(){
     });
 
 
-    
+
     $(":button.domaintain").click(function(){
         console.log("sanitycheck");
         $(":radio:checked").each(function(){
@@ -899,7 +899,7 @@ $("document").ready(function(){
                 data : {machine_name : $("#ctrlbar_machine_name").val() , // change to read ctrlbar
                         rDate   : rDate,
                         rMonth  : rMonth,
-                        rYear   : rYear, 
+                        rYear   : rYear,
                         },
                 success: function(json){
 
@@ -909,7 +909,7 @@ $("document").ready(function(){
                             myBarChartE2.removeData();
                             column -= 1;
                         }
-        
+
                         dat = item.split(":");
                         //update right point of chart
                         rDate = dat[0];
@@ -924,7 +924,7 @@ $("document").ready(function(){
                         column += 1;
 
                         console.log(column);
-                        
+
                     });
                 },
             });
@@ -1023,7 +1023,7 @@ $("document").ready(function(){
 	//         // or any other URL that isn't scheme relative or absolute i.e relative.
 	//         !(/^(\/\/|http:|https:).*/.test(url));
 	// }
-	
+
 
 	// $.ajaxSetup({
 	//     beforeSend: function(xhr, settings) {
@@ -1035,8 +1035,8 @@ $("document").ready(function(){
 	//         }
 	//     }
 	// });
-	
-	$.ajaxSetup({ 
+
+	$.ajaxSetup({
      beforeSend: function(xhr, settings) {
          function getCookie(name) {
              var cookieValue = null;
@@ -1057,7 +1057,7 @@ $("document").ready(function(){
              // Only send the token to relative URLs i.e. locally.
              xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
          }
-     } 
+     }
 });
 
 });
@@ -1068,6 +1068,3 @@ $("document").ready(function(){
 
 </body>
 </html>
-
-
-

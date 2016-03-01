@@ -27,7 +27,7 @@ def maintainlist(request):
     maintain_sch = maintain_schedule.objects.all()
     maintain_his             = maintain_history.objects.filter(maintain_approve=True).order_by('-maintain_approve_time')[:10]
     maintain_his_not_approve = maintain_history.objects.filter(maintain_approve=False).order_by('-maintain_raise_time')
-    
+
     """ try to implement model to custome page """
     machines = machine.objects.all()
     default_machine = machine.objects.get(pk="1")
@@ -41,6 +41,14 @@ def maintainlist(request):
         timedif = m.maintain_time - now
         timedif = timedif.days * 24 + timedif.seconds // 3600
         x.append((m.machine.machine_name,m.maintain_type,timedif))
+
+    """ create list for production counter
+        with data: machine_name date_range counter_size*5
+        this list to generate header of table for all machines
+        and use Jquery to complete details by user
+    """
+
+
 
     return render(request, 'maintainlist.html',{
         'maintain_schedule' : maintain_sch,
@@ -99,12 +107,12 @@ def viewajaxtest(request):
         response_data['text'] = post_text
         response_data['created'] = 'date'
         response_data['author'] = 'that is me'
-        
+
         return HttpResponse(
             json.dumps(response_data),
             content_type="application/json"
         )
-        
+
     else:
         return HttpResponse(
             json.dumps({"nothing to see": "this isn't happening"}),
@@ -113,7 +121,7 @@ def viewajaxtest(request):
 
 def viewajaxupdate(request):
     response_data = {}
-    now = timezone.localtime(timezone.now())   
+    now = timezone.localtime(timezone.now())
 
     if request.method == 'POST':
         post_text = request.POST.get('ajax_dat')
@@ -121,7 +129,7 @@ def viewajaxupdate(request):
 
     if request.method == 'GET':
         response_data = {}
-        response_data['server_time'] = str(now.minute) + ":" + str(now.second) 
+        response_data['server_time'] = str(now.minute) + ":" + str(now.second)
 
 
     return HttpResponse(
@@ -132,7 +140,7 @@ def viewajaxupdate(request):
 def getLatest30DaysEnergy(request):
     response_data = []
     now = timezone.localtime(timezone.now())
-    
+
     if request.method == 'POST':
         machine = request.POST.get('ajax_machine_name')
 
@@ -164,7 +172,7 @@ def getPrevDay(request):
                                                 save_time__year=qDate.year,\
                                                 save_time__month=qDate.month,\
                                                 save_time__day=qDate.day)
-        
+
         for q in query:
             res = str(q.save_time.day) + ":" +\
                   str(q.save_time.month) + ":" +\
@@ -179,11 +187,11 @@ def getPrevDay(request):
         json.dumps(response_data),
         content_type="application/json"
         )
-    
+
 def getFirstMonth(request):
     response_data = []
     now = timezone.localtime(timezone.now())
-    
+
     if request.method == 'POST':
         machine = request.POST.get('ajax_machine_name')
         year = request.POST.get('year')
@@ -205,7 +213,7 @@ def getFirstMonth(request):
     return HttpResponse(
             json.dumps(response_data),
             content_type="application/json"
-        )    
+        )
 
 """ function for maintaining """
 @login_required
@@ -224,7 +232,7 @@ def getDoMaintain(request):
                                                         )
         for maintain in maintain_items:
             print(maintain.machine.machine_name)
-        
+
         if maintain_items:
             for maintain_item in maintain_items:
                 #check this item exist in maintain_history
@@ -246,7 +254,7 @@ def getDoMaintain(request):
                                          maintain_raise_time = timezone.localtime(timezone.now()),\
                         )
                     b.save()
-        
+
     return HttpResponse(
             json.dumps(response_data),
             content_type="application/json"
@@ -261,7 +269,7 @@ def updateMaintain(request):
             maintain_type = request.POST.get("type")
             user_name = request.POST.get("user_name")
             approver = request.POST.get("approver")
-            
+
             #check approver is manager or not
             auth = staff.objects.get(username = user_name,manager = True)
             if auth:
@@ -301,7 +309,7 @@ def updateMaintain(request):
                                                 maintainer = delete_user,\
                                                 maintain_approve = False).delete()
 
-            
+
 
             response_data = "success"
 
@@ -349,7 +357,7 @@ def ajaxloginview(request):
         password = request.POST.get('password')
 
         user = authenticate(username=user_name,password=password)
-        
+
         if user is not None:
             if user.is_active:
                 login(request, user)
@@ -359,17 +367,9 @@ def ajaxloginview(request):
                 response_data.append("disabled")
         else:
             response_data.append("error")
-            
+
 
     return HttpResponse(
             json.dumps(response_data),
             content_type="application/json"
         )
-
-
-
-
-
-
-
-
