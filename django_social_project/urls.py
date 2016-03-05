@@ -24,7 +24,7 @@ from django_social_project import settings
 admin.autodiscover()
 
 urlpatterns = [
-    
+
     url(r'^admin/', include(admin.site.urls)),
     url('', include('social.apps.django_app.urls', namespace='social')),
     url(r'^admin/', include(admin.site.urls)),
@@ -42,6 +42,7 @@ urlpatterns = [
     url(r'^updatemaintain/$','django_social_app.views.updateMaintain'),
     url(r'^ajaxupdatetable/$','django_social_app.views.updateTable'),
     url(r'^ajaxlogin/$','django_social_app.views.ajaxloginview'),
+    url(r'^ajaxexpanddetail/$','django_social_app.views.ajaxexpanddetail'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 """ both for static files handling """
 urlpatterns += staticfiles_urlpatterns()

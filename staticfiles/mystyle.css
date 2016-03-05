@@ -71,19 +71,19 @@ hr{
 
 /* Track */
 #containcr4::-webkit-scrollbar-track {
-    -webkit-box-shadow: inset 0 0 0px rgba(0,0,0,0); 
+    -webkit-box-shadow: inset 0 0 0px rgba(0,0,0,0);
     -webkit-border-radius: 0px;
     border-radius: 0px;
 }
- 
+
 
 
 /* Handle */
 #containcr4::-webkit-scrollbar-thumb {
     -webkit-border-radius: 0px;
     border-radius: 0px;
-    background: rgba(255,0,0,0.8); 
-    -webkit-box-shadow: inset 0 0 0px rgba(0,0,0,0); 
+    background: rgba(255,0,0,0.8);
+    -webkit-box-shadow: inset 0 0 0px rgba(0,0,0,0);
 }
 
 
@@ -119,10 +119,10 @@ hr{
 	height: 250px;
 }
 #briefbar{
-	margin-left: 10px; 
+	margin-left: 10px;
 	margin-top : 8px;
 	font-family: 'Lato', sans-serif;
-	
+
 }
 
 #tophr{
@@ -177,7 +177,7 @@ hr{
 	/*margin-top: 45px;*/
 	width: 1044px;
 	font-family: 'Lato', sans-serif;
-	/* add to control nav bar at top 
+	/* add to control nav bar at top
 	position: relative;*/
 }
 
@@ -197,13 +197,13 @@ hr{
 .parentheaderTemp{
 	margin-left: 40px;
 	width: 1044;
-	font-family: 'Lato', sans-serif;	
+	font-family: 'Lato', sans-serif;
 }
 
 .parentheaderTemp_Login{
 	margin-left: 40px;
 	width: 485px;
-	font-family: 'Lato', sans-serif;	
+	font-family: 'Lato', sans-serif;
 }
 
 .btnhome{
@@ -262,4 +262,8 @@ hr{
 
 .filter-input{
 	width: 60px;
+}
+
+.detail-column{
+	width = 200;
 }

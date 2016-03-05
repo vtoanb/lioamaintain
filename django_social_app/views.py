@@ -18,7 +18,7 @@ from django.contrib.auth import authenticate, login
 #for sort dictionary
 import operator
 
-
+#from time import strptime
 
 def maintainlist(request):
 
@@ -373,3 +373,34 @@ def ajaxloginview(request):
             json.dumps(response_data),
             content_type="application/json"
         )
+
+def ajaxexpanddetail(request):
+    response_data = []
+    if request.method == 'POST':
+        machineName = request.POST.get('machine')
+        beginDate = request.POST.get('beginDate')
+        endDate = request.POST.get('endDate')
+        beginDate = datetime.strptime(beginDate,"%m/%d/%Y").date()
+        endDate = datetime.strptime(endDate,"%m/%d/%Y").date()
+        #print('*****',beginDate,endDate)
+        # Return expand-detail request:
+        counterdetail = counter_history.objects.filter(save_time__range = [beginDate,endDate],\
+                                                        machine__machine_name = machineName)
+        # Sum for each data column
+        sum_1, sum_2, sum_3, sum_4, sum_5 = 0, 0, 0, 0, 0
+        for i in counterdetail:
+            #print(i.save_time.date())
+            x = [i.save_time.date().strftime("%m/%d/%Y"),i.counter,i.counter_2,i.counter_3,i.counter_4,i.counter_5]
+            sum_1 = sum_1 + i.counter
+            sum_2 = sum_2 + i.counter_2
+            sum_3 = sum_3 + i.counter_3
+            sum_4 = sum_4 + i.counter_4
+            sum_5 = sum_5 + i.counter_5
+            response_data.append(x)
+        response_data.append(['sum',sum_1,sum_2,sum_3,sum_4,sum_5])
+        print(response_data)
+
+
+        return HttpResponse(
+        json.dumps(response_data),
+        content_type="application/json")
