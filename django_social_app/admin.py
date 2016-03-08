@@ -33,4 +33,3 @@ admin.site.register(machine,machineAdmin)
 admin.site.register(energy_history,energy_historyAdmin)
 admin.site.register(counter_history,counter_historyAdmin)
 admin.site.register(maintain_history,maintain_historyAdmin)
-

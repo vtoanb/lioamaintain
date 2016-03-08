@@ -63,6 +63,12 @@ def maintainlist(request):
         })
 
 
+"""
+    View for Welcome page
+"""
+def welcomepage(request):
+    return render_to_response('welcomepage.html')
+
 def home(request):
     return render_to_response('home.html')
 
@@ -303,13 +309,17 @@ def updateMaintain(request):
             user_name = request.POST.get("user_name")
             delete_user = request.POST.get("delete_user")
 
-            #check if delete user create this
-            maintain_history.objects.get(machine__machine_name = machine_name,\
-                                                maintain_type = maintain_type,\
-                                                maintainer = delete_user,\
-                                                maintain_approve = False).delete()
-
-
+            if user_name == 'admin':
+                print("he is admin")
+                maintain_history.objects.get(machine__machine_name = machine_name,\
+                                                    maintain_type = maintain_type,\
+                                                    maintain_approve = False).delete()
+            else:
+                #check if delete user create this
+                maintain_history.objects.get(machine__machine_name = machine_name,\
+                                                    maintain_type = maintain_type,\
+                                                    maintainer = delete_user,\
+                                                    maintain_approve = False).delete()
 
             response_data = "success"
 
@@ -390,7 +400,7 @@ def ajaxexpanddetail(request):
         sum_1, sum_2, sum_3, sum_4, sum_5 = 0, 0, 0, 0, 0
         for i in counterdetail:
             #print(i.save_time.date())
-            x = [i.save_time.date().strftime("%m/%d/%Y"),i.counter,i.counter_2,i.counter_3,i.counter_4,i.counter_5]
+            x = [i.save_time.date().strftime("%m/%d/%Y"),i.counter,i.counter_2,i.counter_3,i.energy,i.counter_5]
             sum_1 = sum_1 + i.counter
             sum_2 = sum_2 + i.counter_2
             sum_3 = sum_3 + i.counter_3

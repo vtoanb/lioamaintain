@@ -3,6 +3,7 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- google font -->
+<link href='https://fonts.googleapis.com/css?family=Pacifico' rel='stylesheet' type='text/css'>
 <link href='https://fonts.googleapis.com/css?family=Lato:300' rel='stylesheet' type='text/css'>
 <!-- material icons -->
 <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
@@ -28,373 +29,340 @@
 
 
 
-<div class="w3-containner parentheaderTemp w3-card-2  w3-white resizesmall">
+	<div class="w3-containner parentheaderTemp w3-card-2  w3-white resizesmall">
 
-	{% load staticfiles %}
-	<div class="w3-row tempLogo">
-		<div class="w3-col l6">
-			<img src="{% static "logomod.png" %}" alt="lioalogo" width="110" height="30">
-		</div>
-		<div class="w3-col l6">
-			<form id="loginform" action="" method="post" class="w3-right">
-				{% csrf_token %}
-				{% if not user or user.is_anonymous %}
-				<input type="text" placeholder="username" class="w3-small">
-				<input type="password" placeholder="password" class="w3-small">
-				<input type="submit" class="w3-white w3-small w3-round-large w3-border w3-margin-right">
-				{%else%}
-				<div class="w3-right w3-padding-right">
-					<label>hello, {{user.username}}</label>
-					<label class="w3-border w3-round-large w3-center user-btn w3-padding-left w3-padding-right">logout</label>
-				</div>
-				{%endif%}
-				<div class="w3-right w3-padding-right logoutpart" hidden>
-					<label></label>
-					<label class="w3-border w3-round-large w3-center user-btn w3-padding-left w3-padding-right">logout</label>
-				</div>
-			</form>
-		</div>
-
-	</div>
-	<div class="w3-row temp_myheader w3-white w3-border-top resizesmall">
-		<div class="w3-col l1  w3-padding-left w3-large  confirm-btn" width="40">Confirm</div>
-		<div class="w3-col l1  w3-padding-left w3-large  history-btn" width="40">History</div>
-		<div class="w3-col l1  w3-padding-left w3-large  counter-btn" width="40">Counter</div>
-	</div>
-</div>
-
-<div hidden>
-	<p id="gemail">{{user.email}}</p>
-	<p id="gname">{{user.username}}</p>
-</div>
-
-<hr>
-
-<!-- production data detail table -->
-<div class="w3-card-2 table_con w3-white resizesmall" id="product-detail-table">
-	<table class="w3-table w3-center resizesmall report">
-		<tr class="w3-red">
-			<th width="200">PRODUCTION DATA</th>
-			<th width="200" class="small-hide"></th>
-			<th width="200" class="small-hide"></th>
-			<th class="small-hide"></th>
-		</tr>
-		<tr><td colspan="4">
-			{%for machine in machines%}
-				<button class="w3-btn w3-white w3-border w3-margin w3-large machine-review-btn">{{machine.machine_name}}</button>
-			{%endfor%}
-		</td></tr>
-		{%for mh in machines%}
-		<tr class="w3-border-top" id='vt{{mh.machine_name}}' hidden>
-			<td class="expand-detail-machine" width="100">{{mh.machine_name}}</td>
-			<td><input type="text" placeholder="From Date" class="w3-small datepicker-begin" width="120"></td>
-			<td><input type="text" placeholder="To Date"   class="w3-small datepicker-end" width="120"></td>
-			<td class="w3-right">
-				<button class="w3-btn material-icons w3-small w3-white w3-round-large expand-detail">add</button>
-			</td>
-		</tr>
-		<tr hidden><td colspan='4'>
-			<div class="w3-row">
-				<div class="w3-col l12 table-field ">
-					<table class="w3-table w3-striped display-detail">
-						<tr></tr>
-					</table>
-				</div>
-				<div class="w3-col l12 canvas-field ">
-					<canvas id={{mh.machine_name}} width="900" height="450" class="w3-margin-left w3-margin-top"></canvas>
-				</div>
+		{% load staticfiles %}
+		<div class="w3-row tempLogo">
+			<div class="w3-col l6">
+				<img src="{% static "logomod.png" %}" alt="lioalogo" width="110" height="30">
 			</div>
-			</td></tr>
-		{%endfor%}
-	</table>
-</div>
-
-
-<hr>
-
-
-<div class="w3-card-2 table_con w3-white resizesmall" id="confirm-table">
-	<table class="w3-table w3-center resizesmall report">
-		<tr class="w3-red"><th colspan='6'>MAINTAIN CONFIRM</th></tr>
-		<tr class="w3-border-bottom w3-text-grey">
-			<th class="small-hide">Maintainer</th>
-			<th>Machine</th>
-			<th>Type</th>
-			<th>Remain time</th>
-			<th class="small-hide">Comment</th>
-			<th></th>
-		</tr>
-		{% for his in not_approve_history %}
-		<tr class="{%if not forloop.first%}w3-border-top{%endif%}">
-		 	<td class="small-hide">{{his.maintainer}}</td>
-		 	<td>{{his.machine.machine_name}}</td>
-		 	<td>{{his.maintain_type}}</td>
-		 	<td>
-		 		{%for sch in maintain_schedule %}
-		 			{%if sch.machine.machine_name == his.machine.machine_name and sch.maintain_type = his.maintain_type%}
-		 				{{sch.maintain_time_remain}}
-		 			{%endif%}
-		 		{%endfor%}
-		 	</td>
-		 	<td class="small-hide">{{his.comment}}</td>
-		 	<td class="w3-right">
-		 		<button class=" w3-btn material-icons w3-small w3-white w3-round-large ok-btn">done</button>
-		 		<button class=" w3-btn material-icons w3-small w3-white w3-round-large delete-btn">delete</button>
-		 		<button class=" w3-btn material-icons w3-small w3-white w3-round-large large-expand-btn-raise">add</button>
-		 	</td>
-		 </tr>
-		 <tr class="normal-large-hide">
-		 	<td colspan="6">
-		 		<ul>
-		 		<li class="rescale-large-hide">Maintainer    : {{his.maintainer}}</li>
-		 		<li class="rescale-large-hide">Maintain Type : {{his.maintain_type}}</li>
-		 		<li>Raise time    : {{his.maintain_raise_time}}</li>
-		 		<li class="rescale-large-hide">Comment       : {{his.comment}}</li>
-		 		</ul>
-		 	</td>
-		 </tr>
-		{%endfor%}
-	</table>
-</div>
-
-<hr>
-
-<!-- comment approved table -->
-<div class="w3-card-2 table_con w3-white resizesmall" id="history-table">
-	<table class="w3-table w3-center resizesmall report table-head">
-		<tr class="w3-red">
-			<th colspan=6>MAINTAIN DATA</th>
-		</tr>
-		<tr class="w3-tex-grey">
-			<th class="small-hide">Maintainer</th>
-			<th>Machine</th>
-			<th>Type</th>
-			<th>Approver</th>
-			<th class="small-hide">Comment</th>
-			<th></th>
-		</tr>
-		<tr class="w3-border-bottom">
-			<td class="small-hide"><input type="text" class="w3-small filter-input" id="maintainer_filter"></td>
-			<td><input type="text" class="w3-small filter-input" id="machine_filter"></td>
-			<td><input type="text" class="w3-small filter-input" id="type_filter"></td>
-			<td><input type="text" class="w3-small filter-input" id="approver_filter"></td>
-			<td class="small-hide"><input type="text" class="w3-small" placeholder="10 items" id="items_filter"></td>
-			<td class="w3-right">
-				<button class="w3-btn material-icons w3-small w3-white w3-round-large" id="filter-btn">search</button>
-			</td>
-		</tr>
-		{% for his in maintain_history %}
-		<tr class="{%if not forloop.first%}w3-border-top{%endif%} table-data">
-		 	<td class="small-hide">{{his.maintainer}}</td>
-		 	<td>{{his.machine.machine_name}}</td>
-		 	<td>{{his.maintain_type}}</td>
-		 	<td>{{his.approver}}</td>
-		 	<td class="small-hide">{{his.comment}}</td>
-		 	<td class="w3-right">
-		 		<button class=" w3-btn material-icons w3-small w3-white w3-round-large large-expand-btn">add</button>
-		 	</td>
-		 </tr>
-		 <tr class="normal-large-hide table-data">
-		 	<td colspan="6">
-		 		<ul>
-		 		<li class="rescale-large-hide">Maintainer    : {{his.maintainer}}</li>
-		 		<li class="rescale-large-hide">Maintain Type : {{his.maintain_type}}</li>
-		 		<li>Maintain time : {{his.maintain_time}}</li>
-		 		<li>Raise time    : {{his.maintain_raise_time}}</li>
-		 		<li>Approve time  : {{his.maintain_approve_time}}</li>
-		 		<li class="rescale-large-hide">Comment       : {{his.comment}}</li>
-		 		</ul>
-		 	</td>
-		 </tr>
-		{%endfor%}
-	</table>
-</div>
-
-<hr>
-
-
-
-<!-- move from login -->
-<div class="w3-row login-main-container">
-
-	<div class="w3-col m6" id="containcr4R">
-
-		<!-- control bar -->
-		<div class="w3-row l3 m10 s10 w3-card-2 w3-white" id="cr4short">
-			<div class="w3-col w3-text-red s2 w3-border-right w3-xxlarge" >
-				<input type="text" value="{{default_machine}}" id="ctrlbar_machine_name">
-
-			</div>
-
-			<div class="w3-col s4 w3-center">
-				<div class="w3-row s3 w3-xlarge"> <input type="text" value={{time.year}}  id="ctrlbar_year"> </div>
-				<div class="w3-row s3 w3-xlarge"> <input type="text" value={{time.month}} id="ctrlbar_month"> </div>
-			</div>
-
-
-			<div class="w3-col s2 w3-center w3-xlarge">
-				<div class="w3-row s2">
-					<button class="w3-btn w3-white material-icons w3-round-jumbo" id="ctrlbar_next">keyboard_arrow_right</button> </div>
-				<div class="w3-row s2">
-					<button class="w3-btn w3-white material-icons w3-round-jumbo" id="ctrlbar_prev">update</button> </div>
-			</div>
-
+			<!--div class="w3-col l6" hidden>
+				<form id="loginform" action="" method="post" class="w3-right">
+					{% csrf_token %}
+					{% if not user or user.is_anonymous %}
+					<input type="text" placeholder="username" class="w3-small">
+					<input type="password" placeholder="password" class="w3-small">
+					<input type="submit" class="w3-white w3-small w3-round-large w3-border w3-margin-right">
+					{%else%}
+					<div class="w3-right w3-padding-right">
+						<label>hello, {{user.username}}</label>
+						<label class="w3-border w3-round-large w3-center user-btn w3-padding-left w3-padding-right">logout</label>
+					</div>
+					{%endif%}
+					<div class="w3-right w3-padding-right logoutpart" hidden>
+						<label></label>
+						<label class="w3-border w3-round-large w3-center user-btn w3-padding-left w3-padding-right">logout</label>
+					</div>
+				</form>
+			</div-->
 
 		</div>
-
-		<div class="w3-row l3 m10 s10 w3-card-2 w3-white" id="cr4-enlarge">
-
-			<!-- k4 bao tri + counter -->
-			<div class="w3-containner w3-row">
-				<div class="w3-col">
-					<div class="w3-containner w3-center" id="briefbar">PRODUCT</div>
-				</div>
-			</div>
-			<div class="w3-row">
-				<div class="w3-containner w3-center">
-					<canvas id="myChart" width="460" height="260"></canvas>
-				</div>
-			</div>
-
-			<!-- insert to here -->
-			<div class="w3-col s12">
-				<div class="w3-containner w3-center" id="briefbar"> ENERGY</div>
-			</div>
-
-
-			<div class="w3-containner w3-center">
-				<canvas id="myChartE2" width="460" height="260"></canvas>
-			</div>
-
+		<div class="w3-row temp_myheader w3-white w3-border-top resizesmall" id="menubar">
+			<div class="w3-col l1  w3-padding-left w3-large  confirm-btn" width="40">Confirm</div>
+			<div class="w3-col l1  w3-padding-left w3-large  history-btn" width="40">History</div>
+			<div class="w3-col l1  w3-padding-left w3-large  counter-btn" width="40">Counter</div>
+			{% if not user or user.is_anonymous %}
+				<div class="w3-col l1  w3-padding-left w3-large" width="40" id="loginBtn">Login</div>
+			{% else %}
+				<div class="w3-col l1  w3-padding-left w3-large user-btn" width="40">{{user.username}}</div>
+			{% endif %}
 		</div>
-
-
-
-
-
 	</div>
 
-	<!-- generated code for machine here-->
 	<div hidden>
-		{%for item in x%}
-		<p>{{item}}</p>
-		<p>{{item.0}}</p>
-		<p>{{item.2}}</p>
-		{%endfor%}
+		<p id="gemail">{{user.email}}</p>
+		<p id="gname">{{user.username}}</p>
 	</div>
-	<div class="w3-col m6" id="containcr4">
-<!--
-	{%for machine in machines %}
-	<div class="w3-col l3 m10 s10 w3-card-2 w3-white" id="cr-brief">
-		<div class="w3-row">
-			<div class="w3-col s3 brief-label-btn" id="cr-brief-label">
-				{{machine.machine_name}}
-			</div>
-			<div class="w3-col s9">
 
-				<div class="w3-row w3-red" id="cr-brief-label-maintain">
-					{%for maintain in maintains%}
-					{%if machine.machine_name == maintain.machine.machine_name%}
-					<div class="w3-col s4 w3-center">
-						{{maintain.maintain_type}}
+	<hr>
+<div class="page-content">
 
+	<!-- production data detail table -->
+	<div class="w3-card-2 table_con w3-white resizesmall small-hide" id="product-detail-table">
+		<table class="w3-table w3-center resizesmall report">
+			<tr class="w3-border-bottom w3-text-grey">
+				<th width="300" class="table-title">Production data</th>
+				<th width="300"></th>
+				<th width="300"></th>
+				<th width="100"></th>
+			</tr>
+			<tr><td colspan="4">
+				{%for machine in machines%}
+					<button class="w3-btn w3-white w3-border w3-margin w3-large machine-review-btn">{{machine.machine_name}}</button>
+				{%endfor%}
+			</td></tr>
+			{%for mh in machines%}
+			<tr class=" w3-sand" id='vt{{mh.machine_name}}' hidden>
+				<td class="expand-detail-machine w3-large" width="300">{{mh.machine_name}}</td>
+				<td>
+					<input type="text" placeholder="From Date" class="form-control datepicker-begin" width="40">
+				</td>
+				<td>
+					<input type="text" placeholder="To Date"   class="form-control datepicker-end" width="40">
+				</td>
+				<td class="w3-right">
+					<button class="btn btn-default w3-white w3-round-large expand-detail">view</button>
+				</td>
+			</tr>
+			<tr hidden><td colspan='4'>
+				<div class="w3-row">
+					<div class="w3-col l12 table-field ">
+						<table class="w3-table w3-striped display-detail">
+							<tr></tr>
+						</table>
 					</div>
-					{%endif%}
-					{%endfor%}
+					<div class="w3-col l12 canvas-field ">
+						<canvas id={{mh.machine_name}} width="900" height="450" class="w3-margin-left w3-margin-top"></canvas>
+					</div>
+				</div>
+				</td></tr>
+			{%endfor%}
+		</table>
+	</div>
+
+
+	<hr>
+
+
+	<div class="w3-card-2 table_con w3-white resizesmall" id="confirm-table">
+		<table class="w3-table w3-center resizesmall report">
+			<tr class="w3-text-grey table-title"><th colspan='6'>Maintain confirm</th></tr>
+			<tr class="w3-sand w3-text-grey">
+				<th class="small-hide">Maintainer</th>
+				<th>Machine</th>
+				<th>Type</th>
+				<th>Remain time</th>
+				<th class="small-hide">Comment</th>
+				<th></th>
+			</tr>
+			{% for his in not_approve_history %}
+			<tr class="{%if not forloop.first%}w3-border-top{%endif%}">
+			 	<td class="small-hide">{{his.maintainer}}</td>
+			 	<td>{{his.machine.machine_name}}</td>
+			 	<td>{{his.maintain_type}}</td>
+			 	<td>
+			 		{%for sch in maintain_schedule %}
+			 			{%if sch.machine.machine_name == his.machine.machine_name and sch.maintain_type = his.maintain_type%}
+			 				{{sch.maintain_time_remain}}
+			 			{%endif%}
+			 		{%endfor%}
+			 	</td>
+			 	<td class="small-hide">{{his.comment}}</td>
+			 	<td class="w3-right">
+			 		<button class=" w3-btn material-icons w3-small w3-white w3-round-large ok-btn">done</button>
+			 		<button class=" w3-btn material-icons w3-small w3-white w3-round-large delete-btn">delete</button>
+			 		<button class=" w3-btn material-icons w3-small w3-white w3-round-large large-expand-btn-raise">add</button>
+			 	</td>
+			 </tr>
+			 <tr class="normal-large-hide">
+			 	<td colspan="6">
+			 		<ul>
+			 		<li class="rescale-large-hide">Maintainer    : {{his.maintainer}}</li>
+			 		<li class="rescale-large-hide">Maintain Type : {{his.maintain_type}}</li>
+			 		<li>Raise time    : {{his.maintain_raise_time}}</li>
+			 		<li class="rescale-large-hide">Comment       : {{his.comment}}</li>
+			 		</ul>
+			 	</td>
+			 </tr>
+			{%endfor%}
+		</table>
+	</div>
+
+	<hr>
+
+	<!-- comment approved table -->
+	<div class="w3-card-2 table_con w3-white resizesmall" id="history-table">
+		<table class="w3-table w3-center resizesmall report table-head">
+			<tr class="w3-text-grey">
+				<th class="table-title" colspan=6>Maintain data</th>
+			</tr>
+			<tr class="w3-sand w3-text-grey">
+				<th class="small-hide">Maintainer</th>
+				<th>Machine</th>
+				<th>Type</th>
+				<th>Approver</th>
+				<th class="small-hide">Comment</th>
+				<th></th>
+			</tr>
+			<tr class="w3-border-bottom">
+				<td class="small-hide"><input type="text" class="w3-small filter-input" id="maintainer_filter"></td>
+				<td><input type="text" class="w3-small filter-input" id="machine_filter"></td>
+				<td><input type="text" class="w3-small filter-input" id="type_filter"></td>
+				<td><input type="text" class="w3-small filter-input" id="approver_filter"></td>
+				<td class="small-hide"><input type="text" class="w3-small" placeholder="10 items" id="items_filter"></td>
+				<td class="w3-right">
+					<button class="w3-btn material-icons w3-small w3-white w3-round-large" id="filter-btn">search</button>
+				</td>
+			</tr>
+			{% for his in maintain_history %}
+			<tr class="{%if not forloop.first%}w3-border-top{%endif%} table-data">
+			 	<td class="small-hide">{{his.maintainer}}</td>
+			 	<td>{{his.machine.machine_name}}</td>
+			 	<td>{{his.maintain_type}}</td>
+			 	<td>{{his.approver}}</td>
+			 	<td class="small-hide">{{his.comment}}</td>
+			 	<td class="w3-right">
+			 		<button class=" w3-btn material-icons w3-small w3-white w3-round-large large-expand-btn">add</button>
+			 	</td>
+			 </tr>
+			 <tr class="normal-large-hide table-data">
+			 	<td colspan="6">
+			 		<ul>
+			 		<li class="rescale-large-hide">Maintainer    : {{his.maintainer}}</li>
+			 		<li class="rescale-large-hide">Maintain Type : {{his.maintain_type}}</li>
+			 		<li>Maintain time : {{his.maintain_time}}</li>
+			 		<li>Raise time    : {{his.maintain_raise_time}}</li>
+			 		<li>Approve time  : {{his.maintain_approve_time}}</li>
+			 		<li class="rescale-large-hide">Comment       : {{his.comment}}</li>
+			 		</ul>
+			 	</td>
+			 </tr>
+			{%endfor%}
+		</table>
+	</div>
+
+	<hr>
+
+
+
+	<!-- move from login -->
+	<div class="w3-row login-main-container">
+
+		<div class="w3-col m6" id="containcr4R">
+
+			<!-- control bar -->
+			<div class="w3-row l3 m10 s10 w3-card-2 w3-white" id="cr4short">
+				<div class="w3-col w3-text-red s2 w3-border-right w3-xxlarge" >
+					<input type="text" value="{{default_machine}}" id="ctrlbar_machine_name">
+
+				</div>
+
+				<div class="w3-col s4 w3-center">
+					<div class="w3-row s3 w3-xlarge"> <input type="text" value={{time.year}}  id="ctrlbar_year"> </div>
+					<div class="w3-row s3 w3-xlarge"> <input type="text" value={{time.month}} id="ctrlbar_month"> </div>
+				</div>
+
+
+				<div class="w3-col s2 w3-center w3-xlarge">
+					<div class="w3-row s2">
+						<button class="w3-btn w3-white material-icons w3-round-jumbo" id="ctrlbar_next">keyboard_arrow_right</button> </div>
+					<div class="w3-row s2">
+						<button class="w3-btn w3-white material-icons w3-round-jumbo" id="ctrlbar_prev">update</button> </div>
+				</div>
+
+
+			</div>
+
+			<div class="w3-row l3 m10 s10 w3-card-2 w3-white" id="cr4-enlarge">
+
+				<!-- k4 bao tri + counter -->
+				<div class="w3-containner w3-row">
+					<div class="w3-col">
+						<div class="w3-containner w3-center" id="briefbar">PRODUCT</div>
+					</div>
 				</div>
 				<div class="w3-row">
-					{%for maintain in maintains%}
-						{%if machine.machine_name == maintain.machine.machine_name%}
-							<div class="w3-col s4 w3-large w3-center calc-time-remain">
-						{{maintain.maintain_time_remain}}
-							</div>
-							<div hidden>{{maintain.maintain_time}}</div>
-						{%endif%}
-					{%endfor%}
-				</div>
-				<div class="w3-row maintainchoices">
-					{%for maintain in maintains%}
-					{%if machine.machine_name == maintain.machine.machine_name%}
-					<div class="w3-col s4 w3-center">
-						<input type="radio" name={{machine.machine_name}} value={{maintain.maintain_type}}
-						                       {%if maintain.maintain_time_remain >= 10 %}disabled{%endif%} >
+					<div class="w3-containner w3-center">
+						<canvas id="myChart" width="460" height="260"></canvas>
 					</div>
-					{%endif%}
-					{%endfor%}
+				</div>
+
+				<!-- insert to here -->
+				<div class="w3-col s12">
+					<div class="w3-containner w3-center" id="briefbar"> ENERGY</div>
+				</div>
+
+
+				<div class="w3-containner w3-center">
+					<canvas id="myChartE2" width="460" height="260"></canvas>
 				</div>
 
 			</div>
+
+
+
+
+
 		</div>
-	</div>
-	{%endfor%}
--->
 
-	{%for machine in machines %}
-	<div class="w3-col l3 m10 s10 w3-card-2 w3-white" id="cr-brief">
-		<div class="w3-row">
-			<div class="w3-col s3 brief-label-btn" id="cr-brief-label">
-				{{machine.machine_name}}
-			</div>
-			<div class="w3-col s9">
+		<!-- generated code for machine here-->
+		<div hidden>
+			{%for item in x%}
+			<p>{{item}}</p>
+			<p>{{item.0}}</p>
+			<p>{{item.2}}</p>
+			{%endfor%}
+		</div>
+		<div class="w3-col m6" id="containcr4">
 
-				<div class="w3-row w3-red" id="cr-brief-label-maintain">
-					{%for i in x%}
-					{%if i.0 == machine.machine_name%}
-						<div class="w3-col s4 w3-center">
-							{{i.1}}
-						</div>
-					{%endif%}
-					{%endfor%}
+
+		{%for machine in machines %}
+		<div class="w3-col l3 m10 s10 w3-card-2 w3-white" id="cr-brief">
+			<div class="w3-row">
+				<div class="w3-col s3 brief-label-btn" id="cr-brief-label">
+					{{machine.machine_name}}
 				</div>
-				<div class="w3-row">
-					{%for i in x%}
+				<div class="w3-col s9">
+
+					<div class="w3-row w3-red" id="cr-brief-label-maintain">
+						{%for i in x%}
 						{%if i.0 == machine.machine_name%}
-							<div class="w3-col s4 w3-large w3-center calc-time-remain">
-								{{i.2}}
+							<div class="w3-col s4 w3-center">
+								{{i.1}}
 							</div>
 						{%endif%}
-					{%endfor%}
-				</div>
-				<div class="w3-row maintainchoices">
-					{%for i in x%}
-					{%if i.0 == machine.machine_name%}
-						<div class="w3-col s4 w3-center">
-							<input type="radio" name={{machine.machine_name}} value={{i.1}}
-							                       {%if i.2 >= 10 %}disabled{%endif%} >
-						</div>
-					{%endif%}
-					{%endfor%}
-				</div>
+						{%endfor%}
+					</div>
+					<div class="w3-row">
+						{%for i in x%}
+							{%if i.0 == machine.machine_name%}
+								<div class="w3-col s4 w3-large w3-center calc-time-remain {%if i.2 < 10%}warnanimate{%endif%}">
+									{{i.2}}
+								</div>
+							{%endif%}
+						{%endfor%}
+					</div>
+					<div class="w3-row maintainchoices">
+						{%for i in x%}
+						{%if i.0 == machine.machine_name%}
+							<div class="w3-col s4 w3-center">
+								<input type="radio" name={{machine.machine_name}} value={{i.1}}
+								                       {%if i.2 >= 10 %}disabled{%endif%} >
+							</div>
+						{%endif%}
+						{%endfor%}
+					</div>
 
+				</div>
 			</div>
 		</div>
-	</div>
-	{%endfor%}
+		{%endfor%}
 
+</div><!-- end for page-content -->
 
-		<div class="modal fade" id="myModal" role="dialog">
-		    <div class="modal-dialog modal-sm">
+			<div class="modal fade" id="myModal" role="dialog">
+			    <div class="modal-dialog modal-sm">
 
-		      <!-- Modal content-->
-		      <div class="modal-content w3-center">
-		        <div class="modal-header">
-		          <button type="button" class="close" data-dismiss="modal">&times;</button>
-		          <h6 class="modal-title">Enter comment</h6>
-		        </div>
-		        <div class="modal-body">
-					<div class="form-group">
-	      				<input type="text" class="form-control" id="usr">
-					</div>
-		          <button type="button" class="w3-btn w3-red w3-round-xlarge" id="modalMaintainBtn" >maintain</button>
-		      </div>
+			      <!-- Modal content-->
+			      <div class="modal-content w3-center">
+			        <div class="modal-header">
+			          <button type="button" class="close" data-dismiss="modal">&times;</button>
+			          <h6 class="modal-title">Enter comment</h6>
+			        </div>
+			        <div class="modal-body">
+						<div class="form-group">
+		      				<input type="text" class="form-control" id="usr">
+						</div>
+			          <button type="button" class="w3-btn w3-red w3-round-xlarge" id="modalMaintainBtn" >maintain</button>
+			      </div>
 
-		    </div>
+			    </div>
+
+			</div>
 
 		</div>
 
 	</div>
-
-</div>
 
 
 
@@ -413,14 +381,48 @@
         </div>
     </div>
 </div>
+</div>
 
-<!-- user list modal -->
+<!-- login modal
 
+<!-- Modal -->
+  <div class="modal fade" id="loginModal" role="dialog">
+    <div class="modal-dialog">
+
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">User login</h4>
+        </div>
+        <div class="modal-body">
+					<form id="loginform" action="" method="post">
+						{% csrf_token %}
+
+								<label class="control-label">User name</label>
+								<input class="form-control" type="text">
+
+								<label class="control-label">Password </label>
+								<input class="form-control" type="password"><br>
+
+								<input type="submit" class="btn btn-default">
+							  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+
+
+					</form>
+				</div>
+
+
+        </div>
+      </div>
+
+    </div>
+  </div>
 
 
 {% load staticfiles %}
 
-<link rel="stylesheet" href="{% static      'bootstrap.min.css' %}">
+<!--link rel="stylesheet" href="{% static      'bootstrap.min.css' %}"-->
 
 <script src="{% static "progressbar.js" %}" type="text/javascript"></script>
 <link rel="stylesheet" href="{% static      'w3.css' %}">
@@ -454,6 +456,10 @@ $("document").ready(function(){
   	}
 
 	$(".normal-large-hide").hide();
+
+	$("#loginBtn").on("click",function(){
+		$("#loginModal").modal({show:true});
+	});
 
 	if ($(window).scrollTop() > aboveHeight){aboveHeightRel = aboveHeight;}
   	else{aboveHeightRel = 2 * aboveHeight;}
@@ -593,11 +599,11 @@ $(".expand-detail").on('click',function(){
 			var firstrow = thisparent.next().find('tr');
 
 //			thisparent.next().find('tr:display-detail-row').remove();
-			firstrow.append('<tr class=\'w3-green\'><th width=\'200\'>Date</th><th width=\'200\'>1</th><th width=\'200\'>2</th><th width=\'200\'>3</th><th width=\'200\'>4</th></tr>');
+			firstrow.append('<tr class=\'w3-green\'><th width=\'200\'>Date</th><th width=\'200\'>1</th><th width=\'200\'>2</th><th width=\'200\'>3</th><th width=\'200\'>Energy</th></tr>');
 			$.each(data,function(key,items){
 				var i = 0;
-				firstrow.append('<tr><td>'+items[0]+'</td><td>'+items[1]+'</td><td>'+
-				items[2]+'</td><td>'+items[3]+'</td><td>'+items[4]+'</td></tr>');
+				firstrow.append('<tr><td>'+items[0]+'</td><td class=\'item1-color\'>'+items[1]+'</td><td>'+
+				items[2]+'</td><td>'+items[3]+'</td><td class=\'energy-color\'>'+items[4]+'</td></tr>');
 				if(items[0] != 'sum'){
 					mydetailchart.addData([items[1],items[2],items[3],items[4]],items[0]);
 				};
@@ -626,11 +632,19 @@ $(".expand-detail").on('click',function(){
 			"password" : password,
 		},
 		success : function(json){
-			form.find("input").hide();
-			$(".logoutpart").show();
-			$(".logoutpart label:first-child").text("hello, "+ user);
 			$("#gname").text(user);
-
+			console.log(json);
+			if(json != "error"){
+				$("#loginBtn").hide();
+				$("#menubar").append("<div class=\"w3-col l1  w3-padding-left w3-large user-btn\" width=\"40\">"+user+"</div>");
+				$(".user-btn").on("click",function(){
+					$("#gname").text("");
+			  	location.href = "/logout";
+				});
+				$("#loginModal").find("input").hide();
+				$("#loginModal").find("label").hide();
+				$("#loginModal").find(".modal-title").text("hello " + user +" !");
+			}
 		},
 	});
   		}
@@ -725,7 +739,7 @@ $(".expand-detail").on('click',function(){
   	$('html, body').animate({scrollTop: $('#cr4short').offset().top - aboveHeightRel }, 'fast');
   });
 
-  $(".user-btn").click(function(){
+  $(".user-btn").on("click",function(){
   	$("#gname").text("");
   	location.href = "/logout";
   });
@@ -791,12 +805,13 @@ $(".expand-detail").on('click',function(){
 			rowdataConfirm.push($(this).text());
 		});
 
-		console.log(rowdataConfirm[1]+":"+rowdataConfirm[2]+":"+rowdataConfirm[0]+":"+approverConfirm+":"+approver_emailConfirm);
+		//console.log(rowdataConfirm[1]+":"+rowdataConfirm[2]+":"+rowdataConfirm[0]+":"+approverConfirm+":"+approver_emailConfirm);
 		/* restore this modal title and ok button */
 		$(".modal-title-confirm").text("Confirm this maintain?");
 		$("#modalMaintainBtn-confirm").show();
         $(".myModal-Confirm").modal({backdrop: false});
 	});
+
 
 	$("#modalMaintainBtn-confirm").click(function(){
 		//ajax to update maintain list

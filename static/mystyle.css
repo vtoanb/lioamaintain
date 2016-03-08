@@ -1,8 +1,15 @@
-
+html{
+	background: url("static/gear.jpg") no-repeat center center fixed;
+	-webkit-background-size: cover;
+	-moz-background-size: cover;
+	-o-background-size: cover;
+	background-size: cover;
+}
+/*
 body{
 	background-color: #f5f8fa;
 }
-
+*/
 
 .modal{
 	font-family: 'Lato', sans-serif;
@@ -268,17 +275,4 @@ hr{
 
 .detail-column{
 	width = 200;
-}
-
-.table-title{
-	font-family: 'Pacifico', cursive;
-	font-weight: 100;
-	font-size: 20px;
-}
-
-.item1-color{
-	color: rgba(22,22,255,1);
-}
-.energy-color{
-	color: rgba(200,22,255,1);
 }
